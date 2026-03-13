@@ -132,7 +132,7 @@ cp hosts.nix.sample hosts/<端末名>/default.nix
 
 続いて、コピーしたファイル（`hosts/<端末名>/default.nix`）を編集して、自分の環境に合わせた設定を行います。 
 
-ここではユーザー名を変更します。`username`コマンドの値を自分のユーザー名に変更してください。  
+ここではユーザー名を変更します。`whoami`コマンドの値を自分のユーザー名に変更してください。  
 また、CPUアーキテクチャに応じて、Apple Siliconを搭載したMacの場合は「aarch64-darwin」、Intelを搭載したMacの場合は「x86_64-darwin」を指定します。
 
 ```shell
@@ -149,6 +149,8 @@ in
 ```
 
 設定が完了したら、flake.nixのoutputsセクションを編集して、自身（ホスト）を追加しましょう。 ここでは、固有のホスト名を指定して、Nix-Darwin の設定を追加します。
+
+ホスト名は、`hostname`コマンドで確認できます。
 
 ```shell
 
