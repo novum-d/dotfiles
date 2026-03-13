@@ -1,0 +1,24 @@
+# 端末ごとの固有設定のサンプル
+{ ... }:
+let
+    # TODO: ここを自分のユーザー名に変更
+    username = "{{YOUR_USERNAME}}";
+in
+{
+  nixpkgs.hostPlatform = "aarch64-darwin"; # または "x86_64-darwin"
+  system.stateVersion = 6;
+  system.primaryUser = username;
+
+  users.users."${username}" = {
+    name = username;
+    home = "/Users/${username}";
+  };
+
+  home-manager.users."${username}" = { ... }: {
+    imports = [ ../../home/base ];
+    home.username = username;
+    home.homeDirectory = "/Users/${username}";
+    programs.git.settings.user.name = "${username}";
+    programs.git.settings.user.email = "${username}@gmail.com";
+  };
+}
