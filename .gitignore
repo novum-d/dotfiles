@@ -1,0 +1,119 @@
+# ─────────────────────────
+# Nix
+# ─────────────────────────
+result
+result-*
+.direnv/
+.envrc
+
+# nix build outputs
+*.drv
+*.nar
+*.nix.gcroots
+
+# nix flakes (lockは基本コミットするが不要なら追加)
+# flake.lock
+
+# nixos / home-manager temp
+*.swp
+*.swo
+
+# ─────────────────────────
+# Nix dev shells
+# ─────────────────────────
+.devenv/
+.pre-commit-config.yaml.lock
+
+# ─────────────────────────
+# macOS
+# ─────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Finder metadata
+.Spotlight-V100
+.Trashes
+Icon?
+._*
+
+# macOS temp files
+*.icloud
+
+# ─────────────────────────
+# Linux
+# ─────────────────────────
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ─────────────────────────
+# Editors
+# ─────────────────────────
+.vscode/
+.idea/
+*.iml
+
+# vim / neovim
+*.swp
+*.swo
+*~
+.nvimlog
+
+# ─────────────────────────
+# Logs
+# ─────────────────────────
+*.log
+logs/
+
+# ─────────────────────────
+# Misc
+# ─────────────────────────
+.env
+.env.*
+!.env.example
+
+# cache
+.cache/
+
+# ─────────────────────────
+# JetBrains / IntelliJ IDEA
+# ─────────────────────────
+
+# project files
+.idea/
+
+# user-specific settings
+*.iml
+*.iws
+
+# build outputs (Gradle / IntelliJ)
+out/
+build/
+target/
+
+# logs
+*.log
+logs/
+
+# caches
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# Gradle / Maven (必要なら)
+.gradle/
+.m2/
+
+# Android Studio / IntelliJ system files
+*.hprof
+
+# Kotlin / JVM cache
+.kotlin/
+
+# crash reports
+hs_err_pid*
