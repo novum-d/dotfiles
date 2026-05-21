@@ -249,7 +249,7 @@ This is a macOS Gatekeeper issue, not a Nix evaluation issue. If needed, remove 
 
 Continue shows `[MCP Prompt - failed to load content during startup]`:
 
-Check `~/.continue/logs/core.log`. This has previously been caused by `mcp-server-fetch` exposing a prompt that Continue tried to load without a URL. The fetch MCP server is currently commented out in `home/base/programs/continue/default.nix`.
+Check `~/.continue/logs/core.log`. This has previously been caused by `mcp-server-fetch` exposing a prompt that Continue tried to load without a URL. The fetch MCP server is configured in `home/base/programs/continue/config.yaml`; temporarily comment that `mcpServers` entry if startup fails.
 
 Ollama model errors:
 

@@ -1,0 +1,23 @@
+language: nix
+
+environment:
+  nix:
+    flakes: true
+
+style:
+  - Prefer small reusable modules
+  - Avoid large inline strings
+  - Prefer source files over embedded config
+
+home_manager:
+  - Prefer home.file source over text when possible
+  - Keep declarative configuration reproducible
+
+flakes:
+  - Keep inputs minimal
+  - Prefer explicit package references
+
+debugging:
+  - Inspect full error trace before modifying
+  - Preserve indentation carefully
+  - Verify attribute paths before editing

@@ -1,0 +1,143 @@
+name: Local Config
+version: 0.0.1
+schema: v1
+
+models:
+  - name: Qwen3 Coder 30B
+    provider: ollama
+    model: qwen3-coder:30b
+    apiBase: http://localhost:11434/v1
+
+    defaultCompletionOptions:
+      contextLength: 32768
+      temperature: 0.2
+
+    capabilities:
+      - tool_use
+
+    roles:
+      - chat
+      - edit
+      - apply
+
+context:
+  - provider: file
+  - provider: currentFile
+  - provider: open
+  - provider: code
+  - provider: codebase
+  - provider: repo-map
+  - provider: tree
+
+  - provider: search
+    params:
+      maxResults: 100
+
+  - provider: diff
+  - provider: terminal
+  - provider: problems
+
+  - provider: url
+
+  - provider: web
+    params:
+      n: 5
+
+  - provider: os
+
+docs:
+  - ./prompts/coding.md
+  - ./prompts/review.md
+  - ./prompts/debugging.md
+  - ./prompts/architecture.md
+  - ./prompts/ble.md
+
+  - ./rules/android.yaml
+  - ./rules/rust.yaml
+  - ./rules/continue.yaml
+  - ./rules/nix.yaml
+  - ./rules/sources.yaml
+
+rules:
+  - Always inspect the relevant project files before answering project-specific questions.
+
+  - Use the codebase, repo-map, tree, file, search, and diff context providers when the task depends on repository contents.
+  - Prefer repo-map and search before opening many files.
+  - Inspect surrounding files and imports before editing.
+  - Inspect existing architecture before adding abstractions.
+
+  - Use web or url context when the task depends on current external information, documentation, package behavior, or internet sources.
+
+  - Prefer official documentation over blogs or forums.
+  - Prefer primary sources when available.
+
+  - For Android topics, prioritize developer.android.com.
+  - For Rust topics, prioritize doc.rust-lang.org and docs.rs.
+  - For Nix topics, prioritize nixos.org and wiki.nixos.org.
+  - For Continue topics, prioritize docs.continue.dev and official GitHub repositories.
+
+  - Verify publication date when using web sources.
+  - Prefer documentation matching the current OS, SDK, or tool version.
+
+  - Read only the files necessary for the current task.
+  - Avoid scanning unrelated directories.
+
+  - Ask for missing context instead of guessing.
+  - Prefer minimal diffs over rewriting entire files.
+  - Preserve existing formatting and project structure.
+  - Do not rewrite entire files unnecessarily.
+  - Avoid unrelated refactors.
+  - Do not guess APIs without verification.
+  - Avoid deprecated APIs unless required by existing compatibility constraints.
+
+  - When debugging:
+      - Read the full error message first.
+      - Inspect stack traces carefully.
+      - Identify root cause before proposing fixes.
+      - Prefer incremental targeted fixes.
+
+  - For Android tasks:
+      - Verify Android version-specific behavior.
+      - Verify lifecycle safety.
+      - Verify coroutine cancellation behavior.
+      - Verify BLE permission requirements on Android 12+.
+      - Avoid deprecated Android APIs unless required.
+
+  - For Nix tasks:
+      - Read the full evaluation trace before editing.
+      - Verify attribute paths carefully.
+      - Prefer source files over embedded multiline strings.
+
+mcpServers:
+  - name: filesystem
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-filesystem"
+      - /Users/novumd/repos
+
+  - name: git
+    command: uvx
+    args:
+      - mcp-server-git
+      - --repository
+      - /Users/novumd/repos/dotfiles
+
+  - name: fetch
+    command: uvx
+    args:
+      - mcp-server-fetch
+
+experimental:
+  modelContextProtocol:
+    enabled: true
+    approvalMode: auto
+
+# Optional MCP servers
+
+# - name: sqlite
+#   command: uvx
+#   args:
+#     - mcp-server-sqlite
+#     - --db-path
+#     - /Users/novumd/.continue/mcp.sqlite
