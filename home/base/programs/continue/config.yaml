@@ -6,7 +6,7 @@ models:
   - name: Qwen3 Coder 30B
     provider: ollama
     model: qwen3-coder:30b
-    apiBase: http://localhost:11434/v1
+    apiBase: http://localhost:11434
 
     defaultCompletionOptions:
       contextLength: 32768
@@ -52,11 +52,11 @@ docs:
   - ./prompts/architecture.md
   - ./prompts/ble.md
 
-  - ./rules/android.yaml
-  - ./rules/rust.yaml
-  - ./rules/continue.yaml
-  - ./rules/nix.yaml
-  - ./rules/sources.yaml
+  - ./rules/android.md
+  - ./rules/rust.md
+  - ./rules/continue.md
+  - ./rules/nix.md
+  - ./rules/sources.md
 
 rules:
   - Always inspect the relevant project files before answering project-specific questions.
@@ -90,23 +90,23 @@ rules:
   - Do not guess APIs without verification.
   - Avoid deprecated APIs unless required by existing compatibility constraints.
 
-  - When debugging:
-      - Read the full error message first.
-      - Inspect stack traces carefully.
-      - Identify root cause before proposing fixes.
-      - Prefer incremental targeted fixes.
+  #- When debugging:
+  #    - Read the full error message first.
+  #    - Inspect stack traces carefully.
+  #    - Identify root cause before proposing fixes.
+  #    - Prefer incremental targeted fixes.
 
-  - For Android tasks:
-      - Verify Android version-specific behavior.
-      - Verify lifecycle safety.
-      - Verify coroutine cancellation behavior.
-      - Verify BLE permission requirements on Android 12+.
-      - Avoid deprecated Android APIs unless required.
+  #- For Android tasks:
+  #    - Verify Android version-specific behavior.
+  #    - Verify lifecycle safety.
+  #    - Verify coroutine cancellation behavior.
+  #    - Verify BLE permission requirements on Android 12+.
+  #    - Avoid deprecated Android APIs unless required.
 
-  - For Nix tasks:
-      - Read the full evaluation trace before editing.
-      - Verify attribute paths carefully.
-      - Prefer source files over embedded multiline strings.
+  #- For Nix tasks:
+  #    - Read the full evaluation trace before editing.
+  #    - Verify attribute paths carefully.
+  #    - Prefer source files over embedded multiline strings.
 
 mcpServers:
   - name: filesystem
@@ -123,10 +123,10 @@ mcpServers:
       - --repository
       - /Users/novumd/repos/dotfiles
 
-  - name: fetch
-    command: uvx
-    args:
-      - mcp-server-fetch
+#  - name: fetch
+#    command: uvx
+#    args:
+#      - mcp-server-fetch
 
 experimental:
   modelContextProtocol:
