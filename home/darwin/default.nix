@@ -13,12 +13,16 @@
   homebrew = {
     enable = true;
     onActivation.cleanup = "zap";
+    taps = [
+      "android/tap"
+    ];
     brews = [
       #"node"
       "mas"
     ];
     casks = [
       "font-hack-nerd-font"
+      "android-cli"
       "alacritty"
       "anki"
       "google-chrome"

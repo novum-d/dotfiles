@@ -5,87 +5,79 @@
   programs.git = {
     enable = true;
 
+    includes = [
+      { path = "${./themes.gitconfig}"; }
+    ];
+
     lfs.enable = true;
 
-    delta = {
-      enable = true;
-      options = {
-        navigate = true;
-        line-numbers = true;
-        side-by-side = true;
-      };
-    };
+    settings = {
+      init.defaultBranch = "main";
 
-    extraConfig = {
-      init = {
-        defaultBranch = "main";
-      };
+      pull.rebase = true;
 
-      pull = {
-        rebase = true;
-      };
-
-      rebase = {
-        autoStash = true;
-      };
+      rebase.autoStash = true;
 
       push = {
         autoSetupRemote = true;
         followTags = true;
       };
 
-      fetch = {
-        prune = true;
-      };
+      fetch.prune = true;
 
-      merge = {
-        conflictStyle = "zdiff3";
-      };
+      merge.conflictStyle = "zdiff3";
 
-      rerere = {
-        enabled = true;
-      };
+      rerere.enabled = true;
 
-      ghq = {
-        root = "~/repos";
-      };
+      ghq.root = "~/repos";
 
-      template = {
-        commit = "${./commit_message.txt}";
+      template.commit = "${./commit_message.txt}";
+
+      alias = {
+        a = "add";
+        aa = "add -A";
+
+        b = "branch -vv";
+
+        c = "commit";
+        ca = "commit --amend";
+
+        co = "checkout";
+
+        d = "diff";
+        dc = "diff --cached";
+
+        l = "log --oneline --graph --decorate";
+
+        p = "pull";
+        P = "push";
+
+        st = "status -sb";
+
+        stu = "stash -u";
+        stp = "stash pop";
+        stl = "stash list";
+
+        sw = "switch";
+        swc = "switch -c";
+
+        rb = "rebase";
+
+        last = "log -1 HEAD";
       };
     };
+  };
 
-    aliases = {
-      a = "add";
-      aa = "add -A";
+  programs.delta = {
+    enable = true;
 
-      b = "branch -vv";
+    enableGitIntegration = true;
 
-      c = "commit";
-      ca = "commit --amend";
-
-      co = "checkout";
-
-      d = "diff";
-      dc = "diff --cached";
-
-      l = "log --oneline --graph --decorate";
-
-      p = "pull";
-      P = "push";
-
-      st = "status -sb";
-
-      stu = "stash -u";
-      stp = "stash pop";
-      stl = "stash list";
-
-      sw = "switch";
-      swc = "switch -c";
-
-      rb = "rebase";
-
-      last = "log -1 HEAD";
+    options = {
+      features = "weeping-willow";
+      navigate = true;
+      line-numbers = true;
+      side-by-side = true;
     };
   };
 

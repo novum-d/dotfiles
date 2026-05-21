@@ -9,7 +9,7 @@
     ./programs/lazyvim
     ./programs/continue
     ./programs/jetbrains-toolbox
-    ./programs/lazygit  # 追加
+    ./programs/lazygit # 追加
   ];
   home.packages = with pkgs; [
     nixfmt
@@ -22,11 +22,12 @@
     tre-command
     gh
     ghq
-    lazygit
+    ydiff
     uv
     jq
     tmux
-    # meslo-lgs-nf
+    statix
+    meslo-lgs-nf
   ];
 
   # Home Managerの有効化
@@ -38,3 +39,4 @@
   # Home Managerの状態バージョンを指定
   home.stateVersion = "25.11";
 }
+
