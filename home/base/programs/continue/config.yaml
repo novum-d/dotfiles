@@ -2,6 +2,34 @@ name: Local Config
 version: 0.0.1
 schema: v1
 
+docs:
+  - name: Android Official
+    startUrl: https://developer.android.com
+
+  - name: AOSP
+    startUrl: https://source.android.com
+
+  - name: Kotlin Official
+    startUrl: https://kotlinlang.org/docs/home.html
+
+  - name: Android BLE
+    startUrl: https://developer.android.com/develop/connectivity/bluetooth
+
+  - name: Rust Official
+    startUrl: https://doc.rust-lang.org
+
+  - name: docs.rs
+    startUrl: https://docs.rs
+
+  - name: nix.dev
+    startUrl: https://nix.dev
+
+  - name: Continue Docs
+    startUrl: https://docs.continue.dev
+
+  - name: Ollama
+    startUrl: https://ollama.com
+
 models:
   - name: Qwen3 Coder 30B
     provider: ollama
@@ -45,18 +73,13 @@ context:
 
   - provider: os
 
-docs:
-  - ./prompts/coding.md
-  - ./prompts/review.md
-  - ./prompts/debugging.md
-  - ./prompts/architecture.md
-  - ./prompts/ble.md
-
-  - ./rules/android.md
-  - ./rules/rust.md
-  - ./rules/continue.md
-  - ./rules/nix.md
-  - ./rules/sources.md
+#docs:
+#  - ./prompts/coding.md
+#  - ./prompts/review.md
+#  - ./prompts/debugging.md
+#  - ./prompts/architecture.md
+#  - ./prompts/ble.md
+#
 
 rules:
   - Always inspect the relevant project files before answering project-specific questions.

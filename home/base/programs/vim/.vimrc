@@ -1,0 +1,1 @@
+ignoremap jj <ESC>

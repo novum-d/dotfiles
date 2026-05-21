@@ -104,7 +104,7 @@ git clone git@github.com:novum-d/dotfiles.git
 │   │   ├── default.nix
 │   │   └── programs # 各種プログラムの設定
 │   │       ├── git
-│   │       │   ├── commit_message
+│   │       │   ├── commit_message.txt
 │   │       │   └── default.nix
 │   │       ├── lazyvim
 │   │       │   └── default.nix

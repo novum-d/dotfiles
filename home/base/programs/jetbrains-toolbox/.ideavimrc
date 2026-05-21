@@ -1,0 +1,38 @@
+
+" ideavimrc: https://qiita.com/suzuki-hoge/items/8efa1203a3ccb7b0a2ec
+" vim keybindings setting: https://zenn.dev/vim_jp/articles/2023-05-19-vim-keybind-philosophy
+" vim keybindings: https://qiita.com/colorrabbit/items/755cfbb0e97d48280775#%E3%82%A4%E3%83%B3%E3%83%87%E3%83%B3%E3%83%88
+
+inoremap jj <ESC>
+
+let mapleader = " "
+
+" editor actions
+nmap <leader>q <Action>(HideAllWindows)
+nmap <leader>qa <Action>(CloseAllEditorsButActive)
+nmap <leader>w <Action>(CloseContent)
+nmap <leader>e <Action>(ActivateProjectToolWindow)
+nmap <leader>tt <Action>(ActivateTerminalToolWindow)
+nmap <leader><leader> <Action>(SearchEverywhere)
+nmap <leader>ff <Action>(FindInPath)
+nmap <leader>s <Action>(ShowSettings)
+
+" run actions
+nmap <leader><Enter> <Action>(Run)
+
+" code actions
+nmap <leader>ca <Action>(ShowIntentionActions)
+nmap <leader>cu <Action>(FindUsages)
+nmap <leader>cs <Action>(ActivateStructureToolWindow)
+nmap <leader>cc <Action>(CommentByLineComment)
+nmap <leader>cr <Action>(RenameElement)
+nmap <C-l> <Action>(NextSplitter)
+nmap <C-h> <Action>(PrevSplitter)
+
+" code jumps
+nmap gi <Action>(GotoImplementation)
+nmap ]e <Action>(GotoNextError)
+nmap [e <Action>(GotoPreviousError)
+nmap <S-l> <Action>(NextTab)
+nmap <S-h> <Action>(PreviousTab)
+nmap <S-s> <Action>(Switcher)

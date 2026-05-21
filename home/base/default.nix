@@ -8,6 +8,8 @@
     ./programs/karabiner
     ./programs/lazyvim
     ./programs/continue
+    ./programs/jetbrains-toolbox
+    ./programs/lazygit  # 追加
   ];
   home.packages = with pkgs; [
     nixfmt
@@ -23,9 +25,8 @@
     lazygit
     uv
     jq
-    ydiff
     tmux
-    meslo-lgs-nf
+    # meslo-lgs-nf
   ];
 
   # Home Managerの有効化
