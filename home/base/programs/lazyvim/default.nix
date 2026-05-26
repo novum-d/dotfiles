@@ -3,6 +3,7 @@
 {
   programs.neovim = {
     enable = true;
+    defaultEditor = true;
     extraPackages = with pkgs; [ git ];
     extraLuaConfig = ''
       -- Bootstrap lazy.nvim
@@ -40,8 +41,6 @@
           { import = "lazyvim.plugins.extras.lang.rust" },
           { import = "lazyvim.plugins.extras.lang.nix" },
           { import = "lazyvim.plugins.extras.lang.sql" },
-          { import = "lazyvim.plugins.extras.ai.copilot" },
-          { import = "lazyvim.plugins.extras.ai.copilot-chat" },
           { import = "plugins" },
         },
         defaults = {

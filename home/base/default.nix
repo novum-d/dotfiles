@@ -9,9 +9,10 @@
     ./programs/lazyvim
     ./programs/continue
     ./programs/jetbrains-toolbox
-    ./programs/lazygit # 追加
+    ./programs/lazygit
     ./programs/android
     ./programs/mise
+    ./programs/codex
   ];
   home.packages = with pkgs; [
     nixfmt
@@ -30,6 +31,10 @@
     tmux
     statix
     meslo-lgs-nf
+    graphviz
+    plantuml
+    scrcpy
+    rclone
   ];
 
   # Home Managerの有効化
@@ -40,4 +45,8 @@
 
   # Home Managerの状態バージョンを指定
   home.stateVersion = "25.11";
+
+  home.sessionVariables = {
+    GRAPHVIZ_DOT = "${pkgs.graphviz}/bin/dot";
+  };
 }

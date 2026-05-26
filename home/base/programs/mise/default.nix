@@ -8,10 +8,22 @@
 
     globalConfig = {
       tools = {
-        rust = "latest";
-        java = "latest";
-        elixir = "latest";
+        rust = "stable";
+        java = "21";
+        erlang = "stable";
+        elixir = "stable";
       };
     };
+
+    settings = {
+      auto_install = true;
+      exec_auto_install = true;
+      not_found_auto_install = true;
+      task_run_auto_install = true;
+    };
   };
+
+  home.sessionPath = [
+    "$HOME/.local/share/mise/shims"
+  ];
 }

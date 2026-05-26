@@ -7,10 +7,6 @@
   # unfree（オープンソースでない、またはライセンス場制限のある）なパッケージを許可
   nixpkgs.config.allowUnfree = true;
 
-  environment.systemPackages = [
-    pkgs.ollama
-  ];
-
   system.defaults = {
     NSGlobalDomain = {
       InitialKeyRepeat = 10;
@@ -55,24 +51,36 @@
       "android/tap"
     ];
     brews = [
-      #"node"
       "mas"
+      "ollama"
+      "syncthing"
     ];
     casks = [
       "font-hack-nerd-font"
       "android-cli"
-      "alacritty"
+      "ghostty"
       "anki"
       "google-chrome"
       "karabiner-elements"
       "slack"
       "jetbrains-toolbox"
       "clipy"
+      "obsidian"
     ];
   };
+  launchd.user.agents.syncthing = {
+    serviceConfig = {
+      ProgramArguments = [
+        "/opt/homebrew/bin/syncthing"
+        "serve"
+        "--no-browser"
+      ];
 
+      RunAtLoad = true;
+      KeepAlive = true;
+    };
+  };
   launchd.user.agents.ollama = {
-
     serviceConfig = {
       ProgramArguments = [
         "/opt/homebrew/bin/ollama"

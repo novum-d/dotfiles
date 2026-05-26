@@ -4,9 +4,10 @@
   programs.zsh = {
     enable = true;
     initContent = ''
+      export PATH="$HOME/.local/share/mise/shims:$PATH"
+
       if [[ "$(uname -s)" == "Darwin" ]]; then
         export PATH="$HOME/Library/Application Support/JetBrains/Toolbox/scripts:$PATH"
-        export PATH="$HOME/Library/Android/sdk/platform-tools:$PATH"
       fi
 
       # zoxide

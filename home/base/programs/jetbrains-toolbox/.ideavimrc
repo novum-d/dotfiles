@@ -14,7 +14,8 @@ nmap <leader>w <Action>(CloseContent)
 nmap <leader>e <Action>(ActivateProjectToolWindow)
 nmap <leader>tt <Action>(ActivateTerminalToolWindow)
 nmap <leader><leader> <Action>(SearchEverywhere)
-nmap <leader>ff <Action>(FindInPath)
+nmap <leader>/ <Action>(FindInPath)
+nmap <leader>ff <Action>(GotoFile)
 nmap <leader>s <Action>(ShowSettings)
 
 " run actions
