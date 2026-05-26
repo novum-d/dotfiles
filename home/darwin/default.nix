@@ -6,9 +6,47 @@
 
   # unfree（オープンソースでない、またはライセンス場制限のある）なパッケージを許可
   nixpkgs.config.allowUnfree = true;
+
   environment.systemPackages = [
     pkgs.ollama
   ];
+
+  system.defaults = {
+    NSGlobalDomain = {
+      InitialKeyRepeat = 10;
+      KeyRepeat = 1;
+
+      ApplePressAndHoldEnabled = false;
+      AppleShowAllExtensions = true;
+      AppleShowAllFiles = true;
+
+    };
+
+    finder = {
+      AppleShowAllExtensions = true;
+      FXPreferredViewStyle = "clmv";
+      ShowPathbar = true;
+      ShowStatusBar = true;
+    };
+
+    dock = {
+      autohide = true;
+      show-recents = false;
+      orientation = "bottom";
+      tilesize = 48;
+      mru-spaces = false;
+    };
+
+    trackpad = {
+      Clicking = true;
+      TrackpadThreeFingerDrag = true;
+    };
+  };
+
+  system.keyboard = {
+    enableKeyMapping = true;
+    remapCapsLockToControl = true;
+  };
 
   homebrew = {
     enable = true;
