@@ -10,6 +10,8 @@
     ./programs/continue
     ./programs/jetbrains-toolbox
     ./programs/lazygit # 追加
+    ./programs/android
+    ./programs/mise
   ];
   home.packages = with pkgs; [
     nixfmt
@@ -39,4 +41,3 @@
   # Home Managerの状態バージョンを指定
   home.stateVersion = "25.11";
 }
-
