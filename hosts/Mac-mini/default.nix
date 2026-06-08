@@ -1,5 +1,5 @@
 # 端末ごとの固有設定のサンプル
-{ ... }:
+{ pkgs, ... }:
 let
   username = "novumd";
   user_email = "hamada.tomoki01@gmail.com";
@@ -12,6 +12,7 @@ in
   users.users."${username}" = {
     name = username;
     home = "/Users/${username}";
+    shell = pkgs.zsh;
   };
 
   home-manager.users."${username}" =

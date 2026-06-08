@@ -16,6 +16,7 @@
 
   outputs =
     inputs@{
+      nixpkgs,
       nixpkgs-unstable,
       home-manager,
       nix-darwin,
@@ -28,8 +29,30 @@
       unstable = import nixpkgs-unstable {
         inherit system;
       };
+
+      nixosUnstable = import nixpkgs-unstable {
+        system = "x86_64-linux";
+      };
     in
     {
+      nixosConfigurations = {
+        nixos = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            ./hosts/xps15/configuration.nix
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.backupFileExtension = "backup";
+
+              home-manager.extraSpecialArgs = {
+                unstable = nixosUnstable;
+              };
+            }
+          ];
+        };
+      };
       darwinConfigurations."novumdnoMac-mini" = nix-darwin.lib.darwinSystem {
         inherit system;
 

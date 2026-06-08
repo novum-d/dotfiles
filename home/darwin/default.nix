@@ -7,6 +7,8 @@
   # unfree（オープンソースでない、またはライセンス場制限のある）なパッケージを許可
   nixpkgs.config.allowUnfree = true;
 
+  environment.shells = [ pkgs.zsh ];
+
   system.defaults = {
     NSGlobalDomain = {
       InitialKeyRepeat = 10;
