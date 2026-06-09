@@ -68,6 +68,7 @@
       "jetbrains-toolbox"
       "clipy"
       "obsidian"
+      "zed"
     ];
   };
   launchd.user.agents.syncthing = {
