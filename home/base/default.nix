@@ -35,6 +35,7 @@
     plantuml
     scrcpy
     rclone
+    marp-cli
   ];
 
   # Home Managerの有効化
