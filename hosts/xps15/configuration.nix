@@ -7,6 +7,7 @@ in
 {
   imports = [
     ./hardware-configuration.nix
+    ./fonts
   ];
 
   boot.loader.systemd-boot.enable = true;
@@ -88,7 +89,11 @@ in
   users.users."${username}" = {
     isNormalUser = true;
     description = username;
-    extraGroups = [ "networkmanager" "wheel" "docker" ];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "docker"
+    ];
     packages = with pkgs; [ firefox ];
     shell = pkgs.zsh;
   };
@@ -96,7 +101,10 @@ in
   home-manager.users."${username}" =
     { ... }:
     {
-      imports = [ ../../home/base ];
+      imports = [
+        ../../home/base
+        ../../home/nix
+      ];
       home.username = username;
       home.homeDirectory = "/home/${username}";
       programs.git.settings.user.name = username;
@@ -106,7 +114,10 @@ in
   programs.zsh.enable = true;
 
   nixpkgs.config.allowUnfree = true;
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
   nix.settings.trusted-users = [ username ];
 
   virtualisation.docker.enable = true;
