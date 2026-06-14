@@ -58,12 +58,30 @@ in
 
   services.xserver = {
     enable = true;
+    videoDrivers = [ "nvidia" ];
     xkb.layout = "us";
     xkb.variant = "";
     excludePackages = with pkgs; [ xterm ];
   };
   services.desktopManager.gnome.enable = true;
   services.displayManager.gdm.enable = true;
+
+  boot.blacklistedKernelModules = [ "nouveau" ];
+  hardware.graphics.enable = true;
+  hardware.nvidia = {
+    modesetting.enable = true;
+    nvidiaSettings = true;
+    open = false;
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    prime = {
+      offload = {
+        enable = true;
+        enableOffloadCmd = true;
+      };
+      intelBusId = "PCI:0:2:0";
+      nvidiaBusId = "PCI:1:0:0";
+    };
+  };
 
   services.printing.enable = true;
 

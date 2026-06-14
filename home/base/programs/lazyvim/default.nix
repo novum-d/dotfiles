@@ -51,7 +51,7 @@
           colorscheme = { "gruvbox", "tokyonight", "habamax" },
         },
         checker = {
-          enabled = true,
+          enabled = false,
           notify = false,
         },
         performance = {
@@ -59,6 +59,9 @@
             reset_packpath = false,
             disabled_plugins = {
               "gzip",
+              "matchit",
+              "matchparen",
+              "netrwPlugin",
               "tarPlugin",
               "tohtml",
               "tutor",

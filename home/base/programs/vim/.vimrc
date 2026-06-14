@@ -1,1 +1,1 @@
-ignoremap jj <ESC>
+inoremap jj <ESC>
