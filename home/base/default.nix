@@ -1,5 +1,5 @@
 # 共通のHome Managerの設定ファイル
-{ pkgs, ... }:
+{ pkgs, unstable, ... }:
 {
   # 共通パッケージ
   imports = [
@@ -35,7 +35,7 @@
     plantuml
     scrcpy
     rclone
-    marp-cli
+    unstable.marp-cli
   ];
 
   # Home Managerの有効化

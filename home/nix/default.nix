@@ -1,5 +1,5 @@
 # 共通のHome Managerの設定ファイル
-{ pkgs, ... }:
+{ pkgs, unstable, ... }:
 {
   home.packages = with pkgs; [
     android-studio
@@ -32,6 +32,7 @@
 
   programs.google-chrome = {
     enable = true;
+    package = unstable.google-chrome;
   };
 
   programs.obsidian.enable = true;
