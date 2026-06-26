@@ -4,6 +4,7 @@
   # 共通パッケージ
   imports = [
     ./programs/zsh
+    ./programs/ssh
     ./programs/git
     ./programs/karabiner
     ./programs/lazyvim
