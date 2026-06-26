@@ -2,7 +2,6 @@
 
 let
   username = "novumd";
-  user_email = "hamada.tomoki01@gmail.com";
 in
 {
   imports = [
@@ -125,8 +124,6 @@ in
       ];
       home.username = username;
       home.homeDirectory = "/home/${username}";
-      programs.git.settings.user.name = username;
-      programs.git.settings.user.email = user_email;
     };
 
   programs.zsh.enable = true;

@@ -19,7 +19,5 @@ in
     imports = [ ../../home/base ];
     home.username = username;
     home.homeDirectory = "/Users/${username}";
-    programs.git.settings.user.name = "${username}";
-    programs.git.settings.user.email = "${username}@gmail.com";
   };
 }

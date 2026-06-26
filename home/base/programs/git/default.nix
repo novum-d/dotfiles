@@ -7,6 +7,7 @@
 
     includes = [
       { path = "${./themes.gitconfig}"; }
+      { path = "~/.gitconfig.local"; }
     ];
 
     lfs.enable = true;
