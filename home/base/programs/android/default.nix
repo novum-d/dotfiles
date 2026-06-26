@@ -1,5 +1,5 @@
 # Android development settings
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 let
   androidHome =
@@ -18,7 +18,8 @@ in
     ANDROID_SDK_ROOT = androidHome;
   };
 
-  home.sessionPath = [
+  home.sessionPath = lib.mkBefore [
+    "${pkgs.android-tools}/bin"
     "${androidHome}/cmdline-tools/latest/bin"
     "${androidHome}/emulator"
     "${androidHome}/platform-tools"

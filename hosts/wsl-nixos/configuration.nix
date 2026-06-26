@@ -10,6 +10,10 @@ in
     defaultUser = username;
     startMenuLaunchers = true;
     useWindowsDriver = true;
+    usbip = {
+      enable = true;
+      autoAttach = [ "4-7" ];
+    };
     wslConf = {
       automount.root = "/mnt";
       interop.appendWindowsPath = true;
@@ -58,6 +62,11 @@ in
     };
 
   programs.zsh.enable = true;
+  programs.nix-ld.enable = true;
+
+  services.udev.extraRules = ''
+    SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", MODE:="0666", TAG+="uaccess"
+  '';
 
   nixpkgs.config.allowUnfree = true;
   nix.settings.experimental-features = [
@@ -80,6 +89,9 @@ in
     openssl
     openssl.dev
     pkg-config
+    kmod
+    usbutils
+    android-tools
     unstable.android-studio
   ];
   environment.variables = {

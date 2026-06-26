@@ -2,7 +2,7 @@
 { pkgs, unstable, ... }:
 {
   home.packages = with pkgs; [
-    android-studio
+    unstable.android-studio
     #slack
     #discord
     #jetbrains.rust-rover
