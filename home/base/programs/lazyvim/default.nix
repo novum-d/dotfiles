@@ -4,8 +4,10 @@
   programs.neovim = {
     enable = true;
     defaultEditor = true;
+    withRuby = true;
+    withPython3 = true;
     extraPackages = with pkgs; [ git ];
-    extraLuaConfig = ''
+    initLua = ''
       -- Bootstrap lazy.nvim
       local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
       if not vim.loop.fs_stat(lazypath) then

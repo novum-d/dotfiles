@@ -13,13 +13,13 @@
         erlang = "stable";
         elixir = "stable";
       };
-    };
 
-    settings = {
-      auto_install = true;
-      exec_auto_install = true;
-      not_found_auto_install = true;
-      task_run_auto_install = true;
+      settings = {
+        auto_install = true;
+        exec_auto_install = true;
+        not_found_auto_install = true;
+        task_run_auto_install = true;
+      };
     };
   };
 

@@ -45,7 +45,7 @@
   home.enableNixpkgsReleaseCheck = false;
 
   # Home Managerの状態バージョンを指定
-  home.stateVersion = "25.11";
+  home.stateVersion = "26.05";
 
   home.sessionVariables = {
     GRAPHVIZ_DOT = "${pkgs.graphviz}/bin/dot";
