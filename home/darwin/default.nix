@@ -69,6 +69,7 @@
       "clipy"
       "obsidian"
       "zed"
+      "codex-app"
     ];
   };
   launchd.user.agents.syncthing = {
