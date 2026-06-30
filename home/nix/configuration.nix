@@ -22,6 +22,37 @@ in
     LC_TIME = locale;
   };
 
+  fonts = {
+    fontDir.enable = true;
+
+    packages = with pkgs; [
+      noto-fonts
+      noto-fonts-cjk-sans
+      noto-fonts-cjk-serif
+      noto-fonts-color-emoji
+      nerd-fonts.jetbrains-mono
+    ];
+
+    fontconfig = {
+      enable = true;
+      defaultFonts = {
+        sansSerif = [
+          "Noto Sans CJK JP"
+          "Noto Sans"
+        ];
+        serif = [
+          "Noto Serif CJK JP"
+          "Noto Serif"
+        ];
+        monospace = [
+          "JetBrainsMono Nerd Font"
+          "Noto Sans Mono CJK JP"
+        ];
+        emoji = [ "Noto Color Emoji" ];
+      };
+    };
+  };
+
   users.users."${username}" = {
     isNormalUser = true;
     description = username;

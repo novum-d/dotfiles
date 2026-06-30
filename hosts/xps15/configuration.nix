@@ -3,7 +3,6 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ./fonts
     ../../home/nix/configuration.nix
   ];
 
