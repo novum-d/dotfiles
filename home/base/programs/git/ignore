@@ -1,0 +1,39 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editors
+*.swp
+*.swo
+*~
+.vscode/
+
+# Local environment
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+out/
+.gradle/
+local.properties
+
+# Android build outputs
+build/
+captures/
+.cxx/
+*.apk
+*.ap_
+*.aab
+*.aar
+*.dex
+
+# Kotlin / Java tooling
+.kotlin/
+hs_err_pid*
+replay_pid*

@@ -2,6 +2,8 @@
 { pkgs, ... }:
 
 {
+  home.file.".config/git/ignore".source = ./ignore;
+
   programs.git = {
     enable = true;
 
@@ -13,6 +15,8 @@
     lfs.enable = true;
 
     settings = {
+      core.excludesFile = "~/.config/git/ignore";
+
       init.defaultBranch = "main";
 
       pull.rebase = true;
