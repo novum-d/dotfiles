@@ -90,6 +90,7 @@ in
 
   environment.systemPackages = with pkgs; [
     git
+    glibc.bin
     vim
     wget
     curl

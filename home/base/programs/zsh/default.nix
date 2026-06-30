@@ -6,6 +6,19 @@
     initContent = ''
       export PATH="$HOME/.local/share/mise/shims:$PATH"
 
+      function o() {
+        if command -v wsl-open >/dev/null 2>&1; then
+          wsl-open "$@"
+        elif command -v open >/dev/null 2>&1; then
+          open "$@"
+        elif command -v xdg-open >/dev/null 2>&1; then
+          xdg-open "$@"
+        else
+          echo "o: no opener command found" >&2
+          return 127
+        fi
+      }
+
       if [[ "$(uname -s)" == "Darwin" ]]; then
         export PATH="$HOME/Library/Application Support/JetBrains/Toolbox/scripts:$PATH"
       fi

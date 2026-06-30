@@ -20,6 +20,10 @@
         skipStashWarning = true;
       };
 
+      os.copyToClipboardCmd = ''
+        printf %s {{text}} | sh -c 'if command -v clip.exe >/dev/null 2>&1 && command -v iconv >/dev/null 2>&1; then iconv -f UTF-8 -t UTF-16LE | clip.exe; elif command -v pbcopy >/dev/null 2>&1; then pbcopy; elif command -v wl-copy >/dev/null 2>&1; then wl-copy; elif command -v xclip >/dev/null 2>&1; then xclip -selection clipboard; else cat >/dev/null; fi'
+      '';
+
       git = {
         autoFetch = true;
 
