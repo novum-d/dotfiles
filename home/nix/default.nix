@@ -1,7 +1,19 @@
 # 共通のHome Managerの設定ファイル
 { pkgs, unstable, ... }:
+
+let
+  studio = pkgs.writeShellScriptBin "studio" ''
+    exec ${unstable.android-studio}/bin/android-studio "$@"
+  '';
+in
 {
+  imports = [
+    ../base
+  ];
+
   home.packages = with pkgs; [
+    gcc
+    studio
     unstable.android-studio
     #slack
     #discord

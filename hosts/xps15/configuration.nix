@@ -1,12 +1,10 @@
 { config, pkgs, ... }:
 
-let
-  username = "novumd";
-in
 {
   imports = [
     ./hardware-configuration.nix
     ./fonts
+    ../../home/nix/configuration.nix
   ];
 
   boot.loader.systemd-boot.enable = true;
@@ -27,22 +25,6 @@ in
 
   networking.hostName = "nixos";
   networking.networkmanager.enable = true;
-  networking.firewall.enable = false;
-
-  time.timeZone = "Asia/Tokyo";
-
-  i18n.defaultLocale = "ja_JP.UTF-8";
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "ja_JP.UTF-8";
-    LC_IDENTIFICATION = "ja_JP.UTF-8";
-    LC_MEASUREMENT = "ja_JP.UTF-8";
-    LC_MONETARY = "ja_JP.UTF-8";
-    LC_NAME = "ja_JP.UTF-8";
-    LC_NUMERIC = "ja_JP.UTF-8";
-    LC_PAPER = "ja_JP.UTF-8";
-    LC_TELEPHONE = "ja_JP.UTF-8";
-    LC_TIME = "ja_JP.UTF-8";
-  };
 
   i18n.inputMethod = {
     enable = true;
@@ -103,67 +85,13 @@ in
     };
   };
 
-  users.users."${username}" = {
-    isNormalUser = true;
-    description = username;
+  users.users.novumd = {
     extraGroups = [
       "networkmanager"
-      "wheel"
-      "docker"
     ];
     packages = with pkgs; [ firefox ];
-    shell = pkgs.zsh;
   };
 
-  home-manager.users."${username}" =
-    { ... }:
-    {
-      imports = [
-        ../../home/base
-        ../../home/nix
-      ];
-      home.username = username;
-      home.homeDirectory = "/home/${username}";
-    };
-
-  programs.zsh.enable = true;
-
-  nixpkgs.config.allowUnfree = true;
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
-  nix.settings.trusted-users = [ username ];
-
-  virtualisation.docker.enable = true;
-  virtualisation.docker.rootless = {
-    enable = true;
-    setSocketVariable = true;
-  };
-
-  environment.systemPackages = with pkgs; [
-    git
-    vim
-    wget
-    curl
-    openssl
-    openssl.dev
-    pkg-config
-  ];
-  environment.variables = {
-    EDITOR = "vim";
-    PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
-  };
-
-  services.openssh = {
-    enable = true;
-    settings = {
-      X11Forwarding = true;
-      PermitRootLogin = "no";
-      PasswordAuthentication = false;
-    };
-    openFirewall = true;
-  };
   services.input-remapper.enable = true;
 
   system.stateVersion = "26.05";

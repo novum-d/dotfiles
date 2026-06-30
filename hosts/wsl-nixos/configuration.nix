@@ -2,8 +2,26 @@
 
 let
   username = "novumd";
+  wslOpen = pkgs.writeShellScriptBin "wsl-open" ''
+    set -eu
+
+    if [ "$#" -eq 0 ]; then
+      exit 1
+    fi
+
+    target="$1"
+    if command -v wslpath >/dev/null 2>&1 && [ -e "$target" ]; then
+      target="$(wslpath -w "$target")"
+    fi
+
+    cmd.exe /c start "" "$target"
+  '';
 in
 {
+  imports = [
+    ../../home/nix/configuration.nix
+  ];
+
   wsl = {
     enable = true;
     defaultUser = username;
@@ -21,90 +39,21 @@ in
   };
 
   networking.hostName = "wsl-nixos";
-  networking.firewall.enable = false;
 
-  time.timeZone = "Asia/Tokyo";
-
-  i18n.defaultLocale = "ja_JP.UTF-8";
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "ja_JP.UTF-8";
-    LC_IDENTIFICATION = "ja_JP.UTF-8";
-    LC_MEASUREMENT = "ja_JP.UTF-8";
-    LC_MONETARY = "ja_JP.UTF-8";
-    LC_NAME = "ja_JP.UTF-8";
-    LC_NUMERIC = "ja_JP.UTF-8";
-    LC_PAPER = "ja_JP.UTF-8";
-    LC_TELEPHONE = "ja_JP.UTF-8";
-    LC_TIME = "ja_JP.UTF-8";
-  };
-
-  users.users."${username}" = {
-    isNormalUser = true;
-    description = username;
-    extraGroups = [
-      "wheel"
-      "docker"
-    ];
-    shell = pkgs.zsh;
-  };
-
-  home-manager.users."${username}" =
-    { ... }:
-    {
-      imports = [
-        ../../home/base
-      ];
-      home.username = username;
-      home.homeDirectory = "/home/${username}";
-    };
-
-  programs.zsh.enable = true;
   programs.nix-ld.enable = true;
 
   services.udev.extraRules = ''
     SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", MODE:="0666", TAG+="uaccess"
   '';
 
-  nixpkgs.config.allowUnfree = true;
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
-  nix.settings.trusted-users = [ username ];
-
-  virtualisation.docker.enable = true;
-  virtualisation.docker.rootless = {
-    enable = true;
-    setSocketVariable = true;
-  };
-
   environment.systemPackages = with pkgs; [
-    git
-    vim
-    wget
-    curl
-    openssl
-    openssl.dev
-    pkg-config
     kmod
     usbutils
     android-tools
+    wslOpen
     unstable.android-studio
   ];
-  environment.variables = {
-    EDITOR = "vim";
-    PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
-  };
-
-  services.openssh = {
-    enable = true;
-    settings = {
-      X11Forwarding = true;
-      PermitRootLogin = "no";
-      PasswordAuthentication = false;
-    };
-    openFirewall = true;
-  };
+  environment.variables.BROWSER = "wsl-open";
 
   system.stateVersion = "26.05";
 }
