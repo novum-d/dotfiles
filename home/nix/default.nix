@@ -1,5 +1,10 @@
 # 共通のHome Managerの設定ファイル
-{ pkgs, unstable, ... }:
+{
+  pkgs,
+  unstable,
+  guiPkgs,
+  ...
+}:
 
 let
   studio = pkgs.writeShellScriptBin "studio" ''
@@ -44,10 +49,13 @@ in
 
   programs.google-chrome = {
     enable = true;
-    package = unstable.google-chrome;
+    package = guiPkgs.google-chrome;
   };
 
-  programs.obsidian.enable = true;
+  programs.obsidian = {
+    enable = true;
+    package = guiPkgs.obsidian;
+  };
 
   #programs.zed-editor.enable = true;
 }

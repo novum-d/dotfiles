@@ -26,6 +26,7 @@
     tre-command
     gh
     ghq
+    google-cloud-sdk
     ydiff
     uv
     jq

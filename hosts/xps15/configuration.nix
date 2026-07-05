@@ -1,5 +1,13 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  guiPkgs,
+  ...
+}:
 
+let
+  username = "novumd";
+in
 {
   imports = [
     ./hardware-configuration.nix
@@ -91,6 +99,44 @@
     packages = with pkgs; [ firefox ];
   };
 
+  programs.zsh.enable = true;
+
+  nixpkgs.config.allowUnfree = true;
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
+  nix.settings.trusted-users = [ username ];
+
+  virtualisation.docker.enable = true;
+  virtualisation.docker.rootless = {
+    enable = true;
+    setSocketVariable = true;
+  };
+
+  environment.systemPackages = with pkgs; [
+    git
+    vim
+    wget
+    curl
+    openssl
+    openssl.dev
+    pkg-config
+  ];
+  environment.variables = {
+    EDITOR = "vim";
+    PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
+  };
+
+  services.openssh = {
+    enable = true;
+    settings = {
+      X11Forwarding = true;
+      PermitRootLogin = "no";
+      PasswordAuthentication = false;
+    };
+    openFirewall = true;
+  };
   services.input-remapper.enable = true;
 
   system.stateVersion = "26.05";

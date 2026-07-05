@@ -44,6 +44,10 @@
       nixosConfigurations = {
         nixos = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
+          specialArgs = {
+            unstable = nixosUnstable;
+            guiPkgs = nixosUnstable;
+          };
           modules = [
             ./hosts/xps15/configuration.nix
             home-manager.nixosModules.home-manager
@@ -54,6 +58,7 @@
 
               home-manager.extraSpecialArgs = {
                 unstable = nixosUnstable;
+                guiPkgs = nixosUnstable;
               };
             }
           ];
@@ -84,6 +89,7 @@
 
         specialArgs = {
           inherit unstable;
+          guiPkgs = unstable;
         };
 
         modules = [
@@ -100,6 +106,7 @@
 
             home-manager.extraSpecialArgs = {
               inherit unstable;
+              guiPkgs = unstable;
             };
 
             nix-homebrew = {
