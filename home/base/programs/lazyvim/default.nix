@@ -43,6 +43,20 @@
           { import = "lazyvim.plugins.extras.lang.rust" },
           { import = "lazyvim.plugins.extras.lang.nix" },
           { import = "lazyvim.plugins.extras.lang.sql" },
+          { import = "lazyvim.plugins.extras.ai.copilot" },
+          { import = "lazyvim.plugins.extras.ai.copilot-chat" },
+          {
+            "zbirenbaum/copilot.lua",
+            opts = {
+              copilot_model = "gpt-5.5",
+            },
+          },
+          {
+            "CopilotC-Nvim/CopilotChat.nvim",
+            opts = {
+              model = "gpt-5.5",
+            },
+          },
           { import = "plugins" },
         },
         defaults = {

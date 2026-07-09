@@ -14,6 +14,7 @@
     ./programs/android
     ./programs/mise
     ./programs/codex
+    ./programs/github-copilot
   ];
   home.packages = with pkgs; [
     nixfmt
@@ -25,7 +26,6 @@
     zoxide
     tre-command
     gh
-    github-copilot-cli
     ghq
     google-cloud-sdk
     ydiff
