@@ -1,7 +1,7 @@
-{ pkgs, ... }:
+{ unstable, ... }:
 
 {
-  home.packages = with pkgs; [
+  home.packages = with unstable; [
     github-copilot-cli
   ];
 
