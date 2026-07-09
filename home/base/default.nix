@@ -25,6 +25,7 @@
     zoxide
     tre-command
     gh
+    github-copilot-cli
     ghq
     google-cloud-sdk
     ydiff
