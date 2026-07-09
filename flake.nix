@@ -67,6 +67,7 @@
           system = "x86_64-linux";
           specialArgs = {
             unstable = nixosUnstable;
+            guiPkgs = nixosUnstable;
           };
           modules = [
             nixos-wsl.nixosModules.default
@@ -79,6 +80,7 @@
 
               home-manager.extraSpecialArgs = {
                 unstable = nixosUnstable;
+                guiPkgs = nixosUnstable;
               };
             }
           ];

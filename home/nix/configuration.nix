@@ -50,6 +50,24 @@ in
         ];
         emoji = [ "Noto Color Emoji" ];
       };
+      localConf = ''
+        <alias>
+          <family>JetBrains Mono</family>
+          <prefer>
+            <family>JetBrainsMono Nerd Font</family>
+            <family>Noto Sans Mono CJK JP</family>
+            <family>Noto Sans CJK JP</family>
+          </prefer>
+        </alias>
+        <alias>
+          <family>Segoe UI</family>
+          <prefer>
+            <family>Noto Sans CJK JP</family>
+            <family>Noto Sans</family>
+            <family>Noto Color Emoji</family>
+          </prefer>
+        </alias>
+      '';
     };
   };
 
