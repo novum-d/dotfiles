@@ -141,6 +141,31 @@ android-studio
 
 Device Manager または Run target に実機が表示されれば完了。
 
+## Android Studio のバージョン更新時
+
+Android Studio の設定ディレクトリ名が変わった場合は、`AndroidStudio2026.1.1` を新しいディレクトリ名に置き換える。
+
+変更箇所:
+
+- `home/nix/default.nix`
+  - `STUDIO_VM_OPTIONS` のパス
+  - `home.file.".config/Google/AndroidStudio2026.1.1/studio64.vmoptions"`
+- `hosts/wsl-nixos/configuration.nix`
+  - `androidStudioWsl` 内の `STUDIO_VM_OPTIONS` のパス
+
+確認コマンド:
+
+```shell
+rg -n "AndroidStudio[0-9]" home/nix/default.nix hosts/wsl-nixos/configuration.nix
+```
+
+変更後は WSL/NixOS 設定を評価してから反映する。
+
+```shell
+nix eval .#nixosConfigurations.wsl-nixos.config.system.build.toplevel.drvPath
+sudo nixos-rebuild switch --flake .#wsl-nixos
+```
+
 ## トラブルシュート
 
 ### `adb` が `Could not start dynamically linked executable` で失敗する
