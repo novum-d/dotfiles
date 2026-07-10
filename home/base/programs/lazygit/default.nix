@@ -119,6 +119,13 @@
             }
           ];
         }
+        {
+          key = "B";
+          context = "files";
+          description = "Blame selected file";
+          command = ''git blame --date=short -- {{.SelectedFile.Name | quote}} | delta --paging=always'';
+          output = "terminal";
+        }
       ];
     };
   };
