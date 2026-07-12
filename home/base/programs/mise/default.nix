@@ -26,4 +26,8 @@
   home.sessionPath = [
     "$HOME/.local/share/mise/shims"
   ];
+
+  home.sessionVariables = {
+    JAVA_HOME = "$HOME/.local/share/mise/installs/java/21";
+  };
 }
