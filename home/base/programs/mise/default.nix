@@ -12,6 +12,8 @@
         java = "21";
         erlang = "stable";
         elixir = "stable";
+        python = "3";
+        node = "lts";
       };
 
       settings = {
