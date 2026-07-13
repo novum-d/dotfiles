@@ -60,9 +60,10 @@ let
     target="$1"
     if command -v wslpath >/dev/null 2>&1 && [ -e "$target" ]; then
       target="$(wslpath -w "$target")"
+      exec powershell.exe -NoProfile -Command "& { param([string]\$target) Invoke-Item -LiteralPath \$target }" "$target"
     fi
 
-    cmd.exe /c start "" "$target"
+    exec powershell.exe -NoProfile -Command "& { param([string]\$target) Start-Process \$target }" "$target"
   '';
 in
 {

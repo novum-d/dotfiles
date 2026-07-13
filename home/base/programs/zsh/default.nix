@@ -5,16 +5,19 @@
     enable = true;
     initContent = ''
       export PATH="$HOME/.local/share/mise/shims:$PATH"
+      if [[ -z "$JAVA_HOME" ]] && command -v mise >/dev/null 2>&1; then
+        export JAVA_HOME="$(mise where java 2>/dev/null)"
+      fi
 
-      function o() {
-        if command -v wsl-open >/dev/null 2>&1; then
-          wsl-open "$@"
-        elif command -v open >/dev/null 2>&1; then
-          open "$@"
-        elif command -v xdg-open >/dev/null 2>&1; then
-          xdg-open "$@"
+      function open() {
+        if (( $+commands[wsl-open] )); then
+          command wsl-open "$@"
+        elif (( $+commands[open] )); then
+          command open "$@"
+        elif (( $+commands[xdg-open] )); then
+          command xdg-open "$@"
         else
-          echo "o: no opener command found" >&2
+          echo "open: no opener command found" >&2
           return 127
         fi
       }
@@ -27,6 +30,48 @@
       if command -v zoxide >/dev/null 2>&1; then
         eval "$(zoxide init zsh)"
       fi
+
+      # mise does not currently map all missing binaries (for example java and
+      # python3) through hook-not-found. Bridge the common runtime entrypoints
+      # to their configured mise tools before falling back to zsh's default.
+      if [[ -z "$_dotfiles_cmd_not_found_bridge" ]]; then
+        _dotfiles_cmd_not_found_bridge=1
+        if [[ -n "$(declare -f command_not_found_handler)" ]]; then
+          eval "''${$(declare -f command_not_found_handler)/command_not_found_handler/_dotfiles_command_not_found_handler}"
+        fi
+      fi
+
+      command_not_found_handler() {
+        local cmd="$1"
+        local tool=""
+        shift
+
+        case "$cmd" in
+          java|javac|jar|jshell)
+            tool="java"
+            ;;
+          python|python3|pip|pip3)
+            tool="python"
+            ;;
+        esac
+
+        if [[ -n "$tool" ]] && command -v mise >/dev/null 2>&1; then
+          mise install "$tool" && {
+            (( $+functions[_mise_hook] )) && _mise_hook
+            rehash
+            "$cmd" "$@"
+          }
+          return $?
+        fi
+
+        if [[ -n "$(declare -f _dotfiles_command_not_found_handler)" ]]; then
+          _dotfiles_command_not_found_handler "$cmd" "$@"
+          return $?
+        fi
+
+        echo "zsh: command not found: $cmd" >&2
+        return 127
+      }
 
       # ghq + fzf
       function ghq_fzf_repo() {
