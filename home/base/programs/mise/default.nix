@@ -1,6 +1,19 @@
 # Mise settings
-{ ... }:
+{ lib, pkgs, ... }:
 
+let
+  pythonBuildDeps = with pkgs; [
+    bzip2
+    libffi
+    ncurses
+    openssl
+    readline
+    sqlite
+    tk
+    xz
+    zlib
+  ];
+in
 {
   programs.mise = {
     enable = true;
@@ -14,6 +27,12 @@
         elixir = "stable";
         python = "3";
         node = "lts";
+      };
+
+      env = {
+        CPPFLAGS = lib.concatMapStringsSep " " (pkg: "-I${lib.getDev pkg}/include") pythonBuildDeps;
+        LDFLAGS = lib.concatMapStringsSep " " (pkg: "-L${lib.getLib pkg}/lib") pythonBuildDeps;
+        PKG_CONFIG_PATH = lib.concatMapStringsSep ":" (pkg: "${lib.getDev pkg}/lib/pkgconfig") pythonBuildDeps;
       };
 
       settings = {
