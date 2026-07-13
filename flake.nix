@@ -41,6 +41,21 @@
       };
     in
     {
+      formatter.x86_64-linux = nixosUnstable.writeShellApplication {
+        name = "nixfmt-tree";
+        runtimeInputs = with nixosUnstable; [
+          findutils
+          nixfmt
+        ];
+        text = ''
+          if [ "$#" -gt 0 ]; then
+            exec nixfmt "$@"
+          fi
+
+          find . -name '*.nix' -print0 | xargs -0 nixfmt
+        '';
+      };
+
       nixosConfigurations = {
         nixos = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
