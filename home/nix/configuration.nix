@@ -133,6 +133,15 @@ in
     "flakes"
   ];
   nix.settings.trusted-users = [ username ];
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
+  nix.optimise = {
+    automatic = true;
+    dates = [ "weekly" ];
+  };
 
   virtualisation.docker.enable = true;
   virtualisation.docker.rootless = {
