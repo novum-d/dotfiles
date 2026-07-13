@@ -31,8 +31,8 @@
         eval "$(zoxide init zsh)"
       fi
 
-      # mise does not currently map all missing binaries (for example java and
-      # python3) through hook-not-found. Bridge the common runtime entrypoints
+      # mise does not currently map all missing binaries (for example java,
+      # python3, and mix) through hook-not-found. Bridge the common runtime entrypoints
       # to their configured mise tools before falling back to zsh's default.
       if [[ -z "$_dotfiles_cmd_not_found_bridge" ]]; then
         _dotfiles_cmd_not_found_bridge=1
@@ -43,20 +43,26 @@
 
       command_not_found_handler() {
         local cmd="$1"
-        local tool=""
+        local tools=()
         shift
 
         case "$cmd" in
           java|javac|jar|jshell)
-            tool="java"
+            tools=(java)
             ;;
           python|python3|pip|pip3)
-            tool="python"
+            tools=(python)
+            ;;
+          erl|erlc|escript|dialyzer)
+            tools=(erlang)
+            ;;
+          elixir|iex|mix)
+            tools=(erlang elixir)
             ;;
         esac
 
-        if [[ -n "$tool" ]] && command -v mise >/dev/null 2>&1; then
-          mise install "$tool" && {
+        if (( ''${#tools[@]} )) && command -v mise >/dev/null 2>&1; then
+          mise install "''${tools[@]}" && {
             (( $+functions[_mise_hook] )) && _mise_hook
             rehash
             "$cmd" "$@"
