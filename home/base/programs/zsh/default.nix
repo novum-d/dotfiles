@@ -1,9 +1,11 @@
 # Zsh設定
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 {
   programs.zsh = {
     enable = true;
-    initContent = ''
+    # Run this after Home Manager's mise activation so the command-not-found
+    # bridge wraps mise's handler instead of being overwritten by it.
+    initContent = lib.mkOrder 2000 ''
       export PATH="$HOME/.local/share/mise/shims:$PATH"
       if [[ -z "$JAVA_HOME" ]] && command -v mise >/dev/null 2>&1; then
         export JAVA_HOME="$(mise where java 2>/dev/null)"
@@ -52,6 +54,12 @@
             ;;
           python|python3|pip|pip3)
             tools=(python)
+            ;;
+          rustc|cargo|rustup|rustdoc|rustfmt|clippy-driver)
+            tools=(rust)
+            ;;
+          node|npm|npx|corepack)
+            tools=(node)
             ;;
           erl|erlc|escript|dialyzer)
             tools=(erlang)
