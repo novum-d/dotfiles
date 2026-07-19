@@ -57,82 +57,85 @@ in
   home = {
     packages =
       (with pkgs; [
-      # 開発環境・CLI
-      copyCommand
-      tree-sitter
-      fzf
-      ghq
-      google-cloud-sdk
-      uv
+        # 開発環境・CLI
+        copyCommand
+        tree-sitter
+        fzf
+        ghq
+        google-cloud-sdk
+        uv
 
-      # 検索・ディレクトリ確認
-      ripgrep
-      fd
-      tree
-      tre-command
+        # 検索・ディレクトリ確認
+        ripgrep
+        fd
+        tree
+        tre-command
 
-      # ファイル表示・差分・置換
-      bat
-      eza
-      sd
-      ydiff
+        # ファイル表示・差分・置換
+        bat
+        eza
+        sd
+        ydiff
 
-      # 構造化データ
-      jq
-      yq-go
+        # 構造化データ
+        jq
+        yq-go
 
-      # 通信
-      curl
-      wget
+        # 通信
+        curl
+        wget
 
-      # アーカイブ
-      unzip
-      zip
+        # アーカイブ
+        unzip
+        zip
 
-      # タスク実行・監視
-      just
-      watchexec
+        # タスク実行・監視
+        just
+        watchexec
 
-      # Lint・Format・Language Server
-      nixfmt
-      statix
-      nil
-      shellcheck
-      shfmt
+        # Lint・Format・Language Server
+        nixfmt
+        statix
+        nil
+        shellcheck
+        shfmt
 
-      # ビルド
-      gnumake
-      gcc
-      pkg-config
+        # ビルド
+        gnumake
+        gcc
+        pkg-config
 
-      # 図・ドキュメント
-      graphviz
-      unstable.plantuml
-      unstable.marp-cli
+        # 図・ドキュメント
+        graphviz
+        unstable.plantuml
+        unstable.marp-cli
 
-      # Android・デバイス操作
-      android-tools
-      scrcpy
+        # Android・デバイス操作
+        android-tools
+        scrcpy
 
-      # XML・証明書・調査
-      libxml2
-      openssl
+        # XML・証明書・調査
+        libxml2
+        openssl
 
-      # ストレージ・同期
-      rclone
+        # ストレージ・同期
+        rclone
 
-      # フォント
-      meslo-lgs-nf
+        # フォント
+        meslo-lgs-nf
 
-      # バージョンを優先したいツール
-      unstable.gh
-      unstable.terraform
-    ])
-    ++ lib.optionals pkgs.stdenv.isLinux (with pkgs; [
-      wl-clipboard
-      xclip
-      xsel
-    ]);
+        # バージョンを優先したいツール
+        unstable.gh
+        unstable.terraform
+      ])
+      ++ lib.optionals pkgs.stdenv.isLinux (
+        with pkgs;
+        [
+          wl-clipboard
+          xclip
+          xsel
+        ]
+      );
 
     # Nixpkgsのリリースチェックを無効化
     enableNixpkgsReleaseCheck = false;

@@ -2,11 +2,7 @@
 { lib, pkgs, ... }:
 
 let
-  androidHome =
-    if pkgs.stdenv.isDarwin then
-      "$HOME/Library/Android/sdk"
-    else
-      "$HOME/Android/Sdk";
+  androidHome = if pkgs.stdenv.isDarwin then "$HOME/Library/Android/sdk" else "$HOME/Android/Sdk";
 in
 {
   home.packages = with pkgs; [

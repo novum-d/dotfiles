@@ -108,7 +108,8 @@ in
   services.syncthing = {
     enable = true;
 
-    settings.folders."obsidian" = {
+    settings.folders."hrdcr-v7siz" = {
+      label = "obsidian";
       path = "/home/novumd/repos/obsidian";
       devices = [ "pixel7pro" ];
       versioning = {
