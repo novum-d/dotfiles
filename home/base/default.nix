@@ -64,6 +64,7 @@ in
         ghq
         google-cloud-sdk
         uv
+        git-lfs
 
         # 検索・ディレクトリ確認
         ripgrep
