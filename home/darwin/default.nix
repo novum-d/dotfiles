@@ -49,9 +49,6 @@
   homebrew = {
     enable = true;
     onActivation.cleanup = "zap";
-    taps = [
-      "android/tap"
-    ];
     brews = [
       "mas"
       "ollama"
@@ -59,7 +56,6 @@
     ];
     casks = [
       "font-hack-nerd-font"
-      "android-cli"
       "ghostty"
       "anki"
       "google-chrome"

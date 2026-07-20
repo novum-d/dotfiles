@@ -15,6 +15,9 @@
 
     nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
     nixos-wsl.inputs.nixpkgs.follows = "nixpkgs";
+
+    herdr.url = "github:ogulcancelik/herdr/v0.7.4";
+    herdr.inputs.nixpkgs.follows = "nixpkgs-unstable";
   };
 
   outputs =
@@ -25,6 +28,7 @@
       nix-darwin,
       nix-homebrew,
       nixos-wsl,
+      herdr,
       ...
     }:
     let
@@ -74,6 +78,7 @@
               home-manager.extraSpecialArgs = {
                 unstable = nixosUnstable;
                 guiPkgs = nixosUnstable;
+                inherit herdr;
               };
             }
           ];
@@ -96,6 +101,7 @@
               home-manager.extraSpecialArgs = {
                 unstable = nixosUnstable;
                 guiPkgs = nixosUnstable;
+                inherit herdr;
               };
             }
           ];
@@ -123,6 +129,7 @@
 
             home-manager.extraSpecialArgs = {
               inherit unstable;
+              inherit herdr;
               guiPkgs = unstable;
             };
 

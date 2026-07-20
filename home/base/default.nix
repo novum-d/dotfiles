@@ -39,6 +39,8 @@ let
   '';
 in
 {
+  manual.manpages.enable = false;
+
   # 共通パッケージ
   imports = [
     ./programs/zsh
@@ -53,6 +55,7 @@ in
     ./programs/mise
     ./programs/codex
     ./programs/github-copilot
+    ./programs/herdr
   ];
   home = {
     packages =

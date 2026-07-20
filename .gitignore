@@ -81,6 +81,9 @@ logs/
 # cache
 .cache/
 
+# local scratch notes
+memo.md
+
 # ─────────────────────────
 # JetBrains / IntelliJ IDEA
 # ─────────────────────────
