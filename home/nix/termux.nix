@@ -8,6 +8,7 @@ let
 in
 {
   android-integration.termux-reload-settings.enable = true;
+  terminal.font = "${pkgs.meslo-lgs-nf}/share/fonts/truetype/MesloLGS NF Regular.ttf";
   user.shell = "${pkgs.zsh}/bin/zsh";
 
   build.activationAfter.linkTermuxProperties = ''
