@@ -72,6 +72,7 @@
         home-manager-path = home-manager-droid.outPath;
 
         modules = [
+          ./home/nix/termux.nix
           {
             environment = {
               etcBackupExtension = ".bak";

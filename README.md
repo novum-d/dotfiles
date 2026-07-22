@@ -2,6 +2,8 @@
 
 このリポジトリは、 Nix-Darwin と Nix Flake を使用してmacOSを管理するためのdotfilesを提供しています。 これらのdotfilesは、Nix-Darwin を使用してmacOSの設定やパッケージ管理を行うための基本的な構成を含んでいます。
 
+Androidへの導入方法は、[Nix-on-Droid セットアップ手順](docs/nix-on-droid.md)を参照してください。
+
 ## 1. Determinate Systems からNix をインストールする
 
 Nixをインストールする方法として、他に公式のインストーラーやLixなどもありますが、 今回は[uninstaller](https://zero-to-nix.com/start/uninstall/)を提供していたり、Nix Flakeが最初から有効化されているなど...なにかと便利な[Determinate Systems](https://docs.determinate.systems/determinate-nix/) からNix をインストールする方法を紹介します。
