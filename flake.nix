@@ -9,6 +9,9 @@
 
     home-manager.url = "github:nix-community/home-manager/release-26.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager-droid.url =
+      "github:nix-community/home-manager/2539eba97a6df237d75617c25cd2dbef92df3d5b";
+    home-manager-droid.inputs.nixpkgs.follows = "nixpkgs-droid";
 
     nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-26.05";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
@@ -20,7 +23,7 @@
 
       # nix-on-droid#495 の一時回避
       inputs.nixpkgs.follows = "nixpkgs-droid";
-      inputs.home-manager.follows = "home-manager";
+      inputs.home-manager.follows = "home-manager-droid";
     };
 
     nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
@@ -36,6 +39,7 @@
       nixpkgs-unstable,
       nixpkgs-droid,
       home-manager,
+      home-manager-droid,
       nix-darwin,
       nix-homebrew,
       nix-on-droid,
@@ -65,7 +69,7 @@
     {
       nixOnDroidConfigurations.default = nix-on-droid.lib.nixOnDroidConfiguration {
         pkgs = droidPkgs;
-        home-manager-path = home-manager.outPath;
+        home-manager-path = home-manager-droid.outPath;
 
         modules = [
           {
