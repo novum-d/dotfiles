@@ -16,6 +16,10 @@
     nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
     nixos-wsl.inputs.nixpkgs.follows = "nixpkgs";
 
+    nix-on-droid.url = "github:nix-community/nix-on-droid/master";
+    nix-on-droid.inputs.nixpkgs.follows = "nixpkgs";
+    nix-on-droid.inputs.home-manager.follows = "home-manager";
+
     herdr.url = "github:ogulcancelik/herdr/v0.7.4";
     herdr.inputs.nixpkgs.follows = "nixpkgs-unstable";
   };
@@ -28,6 +32,7 @@
       nix-darwin,
       nix-homebrew,
       nixos-wsl,
+      nix-on-droid,
       herdr,
       ...
     }:
@@ -41,6 +46,20 @@
 
       nixosUnstable = import nixpkgs-unstable {
         system = "x86_64-linux";
+        config.allowUnfree = true;
+      };
+
+      androidSystem = "aarch64-linux";
+
+      androidPkgs = import nixpkgs {
+        system = androidSystem;
+        overlays = [ nix-on-droid.overlays.default ];
+        config.allowUnfree = true;
+      };
+
+      androidUnstable = import nixpkgs-unstable {
+        system = androidSystem;
+        overlays = [ nix-on-droid.overlays.default ];
         config.allowUnfree = true;
       };
     in
@@ -107,6 +126,32 @@
           ];
         };
       };
+
+      nixOnDroidConfigurations =
+        let
+          pixel7pro = nix-on-droid.lib.nixOnDroidConfiguration {
+            pkgs = androidPkgs;
+            home-manager-path = home-manager.outPath;
+
+            extraSpecialArgs = {
+              unstable = androidUnstable;
+              guiPkgs = androidUnstable;
+              inherit herdr;
+            };
+
+            modules = [
+              ./hosts/pixel7pro
+              {
+                nix.registry.nixpkgs.flake = nixpkgs;
+              }
+            ];
+          };
+        in
+        {
+          inherit pixel7pro;
+          default = pixel7pro;
+        };
+
       darwinConfigurations."novumdnoMac-mini" = nix-darwin.lib.darwinSystem {
         inherit system;
 

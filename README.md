@@ -1,4 +1,10 @@
-# Nix-Darwin & Nix Flake を使用してmacOSを管理するためのdotfiles
+# Nix Flake による dotfiles
+
+macOS (nix-darwin)、NixOS/WSL、Android (Nix-on-Droid) 用の構成を管理します。
+
+Android の導入手順は [Nix-on-Droid セットアップ](docs/nix-on-droid.md) を参照してください。
+
+## macOS
 
 このリポジトリは、 Nix-Darwin と Nix Flake を使用してmacOSを管理するためのdotfilesを提供しています。 これらのdotfilesは、Nix-Darwin を使用してmacOSの設定やパッケージ管理を行うための基本的な構成を含んでいます。
 

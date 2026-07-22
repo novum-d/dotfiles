@@ -1,5 +1,10 @@
 # Zsh設定
-{ lib, pkgs, ... }:
+{
+  lib,
+  pkgs,
+  isNixOnDroid ? false,
+  ...
+}:
 {
   programs.zsh = {
     enable = true;
@@ -12,7 +17,9 @@
       fi
 
       function open() {
-        if (( $+commands[wsl-open] )); then
+        if (( $+commands[termux-open] )); then
+          command termux-open "$@"
+        elif (( $+commands[wsl-open] )); then
           command wsl-open "$@"
         elif (( $+commands[open] )); then
           command open "$@"
@@ -140,6 +147,8 @@
       u =
         if pkgs.stdenv.isDarwin then
           "sudo darwin-rebuild switch --flake ."
+        else if isNixOnDroid then
+          "nix-on-droid switch --flake .#pixel7pro"
         else
           "sudo nixos-rebuild switch --flake .";
     };
