@@ -13,6 +13,12 @@
 
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
 
+    nix-on-droid = {
+      url = "github:nix-community/nix-on-droid/release-24.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
+
     nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
     nixos-wsl.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -27,6 +33,7 @@
       home-manager,
       nix-darwin,
       nix-homebrew,
+      nix-on-droid,
       nixos-wsl,
       herdr,
       ...
@@ -43,8 +50,85 @@
         system = "x86_64-linux";
         config.allowUnfree = true;
       };
+
+      droidPkgs = import nixpkgs {
+        system = "aarch64-linux";
+        overlays = [ nix-on-droid.overlays.default ];
+        config.allowUnfree = true;
+      };
     in
     {
+      nixOnDroidConfigurations.default = nix-on-droid.lib.nixOnDroidConfiguration {
+        pkgs = droidPkgs;
+        home-manager-path = home-manager.outPath;
+
+        modules = [
+          {
+            environment = {
+              etcBackupExtension = ".bak";
+              packages = with droidPkgs; [
+                coreutils
+                curl
+                diffutils
+                findutils
+                git
+                gnugrep
+                gnused
+                gnutar
+                openssh
+                procps
+                vim
+                wget
+              ];
+            };
+
+            nix.extraOptions = ''
+              experimental-features = nix-command flakes
+            '';
+
+            time.timeZone = "Asia/Tokyo";
+            system.stateVersion = "24.05";
+
+            home-manager = {
+              backupFileExtension = "hm-bak";
+              useGlobalPkgs = true;
+              config =
+                { lib, pkgs, ... }:
+                {
+                  imports = [
+                    ./home/base/programs/zsh
+                    ./home/base/programs/git
+                    ./home/base/programs/lazyvim
+                    ./home/base/programs/tmux
+                    ./home/base/programs/continue
+                  ];
+
+                  manual.manpages.enable = false;
+                  home = {
+                    stateVersion = "26.05";
+                    packages = with pkgs; [
+                      bat
+                      eza
+                      fd
+                      fzf
+                      jq
+                      lazygit
+                      ripgrep
+                      tree
+                      unzip
+                      zip
+                    ];
+                    sessionVariables.EDITOR = "nvim";
+                  };
+
+                  programs.zsh.shellAliases.u =
+                    lib.mkForce "nix-on-droid switch --flake .";
+                };
+            };
+          }
+        ];
+      };
+
       formatter.x86_64-linux = nixosUnstable.writeShellApplication {
         name = "nixfmt-tree";
         runtimeInputs = with nixosUnstable; [
