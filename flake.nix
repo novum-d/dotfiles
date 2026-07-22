@@ -5,7 +5,7 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nixpkgs-droid.url =
-      "github:NixOS/nixpkgs/2bceeb45e516fc6956714014c92ddfdafe4c9da3";
+      "github:NixOS/nixpkgs/88d3861acdd3d2f0e361767018218e51810df8a1";
 
     home-manager.url = "github:nix-community/home-manager/release-26.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
