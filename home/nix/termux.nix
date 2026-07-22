@@ -8,6 +8,7 @@ let
 in
 {
   android-integration.termux-reload-settings.enable = true;
+  user.shell = "${pkgs.zsh}/bin/zsh";
 
   build.activationAfter.linkTermuxProperties = ''
     $DRY_RUN_CMD mkdir $VERBOSE_ARG -p "${termuxConfigDir}"

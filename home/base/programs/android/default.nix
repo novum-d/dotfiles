@@ -10,10 +10,10 @@ let
   androidHome = if pkgs.stdenv.isDarwin then "$HOME/Library/Android/sdk" else "$HOME/Android/Sdk";
 in
 {
-  home.packages = with pkgs; [
-    android-tools
-    unstable.android-cli
-  ];
+  home.packages = [
+    pkgs.android-tools
+  ]
+  ++ lib.optional (lib.meta.availableOn pkgs.stdenv.hostPlatform unstable.android-cli) unstable.android-cli;
 
   home.sessionVariables = {
     ANDROID_HOME = androidHome;

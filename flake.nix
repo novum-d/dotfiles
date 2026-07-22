@@ -65,6 +65,31 @@
         overlays = [ nix-on-droid.overlays.default ];
         config.allowUnfree = true;
       };
+
+      droidUnstable = import nixpkgs-unstable {
+        system = "aarch64-linux";
+        config.allowUnfree = true;
+      };
+
+      droidCodexDuo = droidPkgs.writeShellScriptBin "hcodex-duo" ''
+        set -eu
+
+        if [ "''${HERDR_ENV:-}" != "1" ]; then
+          echo "hcodex-duo: run this inside a Herdr pane" >&2
+          echo "Start Herdr with: herdr" >&2
+          exit 64
+        fi
+
+        suffix="''${HERDR_TEAM_SUFFIX:-$$}"
+
+        herdr agent start "codex-bottom-$suffix" \
+          --cwd "$PWD" \
+          --split down \
+          --focus \
+          -- codex "$@"
+
+        exec codex "$@"
+      '';
     in
     {
       nixOnDroidConfigurations.default = nix-on-droid.lib.nixOnDroidConfiguration {
@@ -102,37 +127,26 @@
             home-manager = {
               backupFileExtension = "hm-bak";
               useGlobalPkgs = true;
+              extraSpecialArgs = {
+                unstable = droidUnstable;
+                guiPkgs = droidUnstable;
+                inherit herdr;
+              };
               config =
                 { lib, pkgs, ... }:
                 {
                   imports = [
-                    ./home/base/programs/zsh
-                    ./home/base/programs/git
-                    ./home/base/programs/lazyvim
+                    ./home/base
                     ./home/base/programs/tmux
-                    ./home/base/programs/continue
                   ];
 
-                  manual.manpages.enable = false;
-                  home = {
-                    stateVersion = "26.05";
-                    packages = with pkgs; [
-                      bat
-                      eza
-                      fd
-                      fzf
-                      jq
-                      lazygit
-                      ripgrep
-                      tree
-                      unzip
-                      zip
-                    ];
-                    sessionVariables.EDITOR = "nvim";
-                  };
+                  home.packages = [ droidCodexDuo ];
 
-                  programs.zsh.shellAliases.u =
-                    lib.mkForce "nix-on-droid switch --flake .";
+                  programs.zsh.shellAliases = {
+                    u = lib.mkForce "nix-on-droid switch --flake .";
+                    hmobile = lib.mkForce "hcodex-duo";
+                    hphone = "hcodex-duo";
+                  };
                 };
             };
           }

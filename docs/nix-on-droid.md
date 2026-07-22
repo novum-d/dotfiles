@@ -47,6 +47,36 @@ activation が最後まで完了したら、新しいターミナルを開いて
 u
 ```
 
+ログインシェルは zsh に設定される。新しいターミナルで次のように確認できる。
+
+```shell
+echo "$SHELL"
+```
+
+## Herdr で Codex を上下に並べる
+
+Home Manager の共通 `home/base` 設定により、Herdr と Codex も導入される。リポジトリの作業ディレクトリで Herdr を起動する。
+
+```shell
+herdr
+```
+
+Herdr のペイン内で次のいずれかを実行すると、縦画面を上下に分割して両方のペインで Codex が起動する。
+
+```shell
+hcodex-duo
+# または
+hmobile
+# または
+hphone
+```
+
+同じ初期プロンプトを両方へ渡す場合は、引数に指定する。
+
+```shell
+hmobile "このリポジトリの構成を確認して"
+```
+
 ## 日本語を入力できるようにする
 
 このリポジトリは `~/.termux/termux.properties` に次の設定を反映する。

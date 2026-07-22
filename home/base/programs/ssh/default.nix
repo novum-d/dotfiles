@@ -2,10 +2,14 @@
 {
   config,
   lib,
+  options,
   pkgs,
   ...
 }:
 
+let
+  hasSettingsOption = lib.hasAttrByPath [ "programs" "ssh" "settings" ] options;
+in
 {
   home.activation.generateSshKey = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     ssh_dir="${config.home.homeDirectory}/.ssh"
@@ -29,19 +33,39 @@
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
+  }
+  // (
+    if hasSettingsOption then
+      {
+        settings = {
+          "*" = {
+            AddKeysToAgent = "yes";
+            HashKnownHosts = "yes";
+            ServerAliveInterval = 60;
+            ServerAliveCountMax = 3;
+          };
 
-    settings = {
-      "*" = {
-        AddKeysToAgent = "yes";
-        HashKnownHosts = "yes";
-        ServerAliveInterval = 60;
-        ServerAliveCountMax = 3;
-      };
+          "github.com" = {
+            User = "git";
+            IdentityFile = "~/.ssh/id_ed25519";
+          };
+        };
+      }
+    else
+      {
+        matchBlocks = {
+          "*" = {
+            addKeysToAgent = "yes";
+            hashKnownHosts = true;
+            serverAliveInterval = 60;
+            serverAliveCountMax = 3;
+          };
 
-      "github.com" = {
-        User = "git";
-        IdentityFile = "~/.ssh/id_ed25519";
-      };
-    };
-  };
+          "github.com" = {
+            user = "git";
+            identityFile = "~/.ssh/id_ed25519";
+          };
+        };
+      }
+  );
 }
