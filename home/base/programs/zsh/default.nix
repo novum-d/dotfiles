@@ -24,6 +24,10 @@
         fi
       }
 
+      cxi() {
+        command codex "$@" </dev/tty >/dev/tty 2>/dev/tty
+      }
+
       if [[ "$(uname -s)" == "Darwin" ]]; then
         export PATH="$HOME/Library/Application Support/JetBrains/Toolbox/scripts:$PATH"
       fi
