@@ -4,6 +4,8 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs-droid.url =
+      "github:NixOS/nixpkgs/2bceeb45e516fc6956714014c92ddfdafe4c9da3";
 
     home-manager.url = "github:nix-community/home-manager/release-26.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
@@ -17,9 +19,7 @@
       url = "github:nix-community/nix-on-droid/release-24.05";
 
       # nix-on-droid#495 の一時回避
-      inputs.nixpkgs.url =
-        "github:NixOS/nixpkgs/2bceeb45e516fc6956714014c92ddfdafe4c9da3";
-
+      inputs.nixpkgs.follows = "nixpkgs-droid";
       inputs.home-manager.follows = "home-manager";
     };
 
@@ -34,6 +34,7 @@
     inputs@{
       nixpkgs,
       nixpkgs-unstable,
+      nixpkgs-droid,
       home-manager,
       nix-darwin,
       nix-homebrew,
@@ -55,7 +56,7 @@
         config.allowUnfree = true;
       };
 
-      droidPkgs = import nixpkgs {
+      droidPkgs = import nixpkgs-droid {
         system = "aarch64-linux";
         overlays = [ nix-on-droid.overlays.default ];
         config.allowUnfree = true;

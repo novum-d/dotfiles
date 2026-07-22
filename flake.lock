@@ -144,7 +144,9 @@
           "home-manager"
         ],
         "nix-formatter-pack": "nix-formatter-pack",
-        "nixpkgs": "nixpkgs-nix-on-droid",
+        "nixpkgs": [
+          "nixpkgs-droid"
+        ],
         "nixpkgs-docs": "nixpkgs-docs",
         "nixpkgs-for-bootstrap": "nixpkgs-for-bootstrap",
         "nmd": "nmd_2"
@@ -250,7 +252,7 @@
         "type": "github"
       }
     },
-    "nixpkgs-nix-on-droid": {
+    "nixpkgs-droid": {
       "locked": {
         "lastModified": 1769299088,
         "narHash": "sha256-VpK0WgdunM6YIra1fij2zm8T+FD1maF8OcCY5H88fV4=",
@@ -329,6 +331,7 @@
         "nix-on-droid": "nix-on-droid",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs",
+        "nixpkgs-droid": "nixpkgs-droid",
         "nixpkgs-unstable": "nixpkgs-unstable"
       }
     },
