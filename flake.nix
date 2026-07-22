@@ -15,7 +15,11 @@
 
     nix-on-droid = {
       url = "github:nix-community/nix-on-droid/release-24.05";
-      inputs.nixpkgs.follows = "nixpkgs";
+
+      # nix-on-droid#495 の一時回避
+      inputs.nixpkgs.url =
+        "github:NixOS/nixpkgs/2bceeb45e516fc6956714014c92ddfdafe4c9da3";
+
       inputs.home-manager.follows = "home-manager";
     };
 
