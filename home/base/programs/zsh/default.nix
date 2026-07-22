@@ -24,7 +24,7 @@
         fi
       }
 
-      cxi() {
+      codex() {
         command codex "$@" </dev/tty >/dev/tty 2>/dev/tty
       }
 
