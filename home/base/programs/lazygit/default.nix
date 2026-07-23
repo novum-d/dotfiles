@@ -1,10 +1,57 @@
 # Lazygit設定
-{ unstable, ... }:
+{
+  config,
+  pkgs,
+  unstable,
+  ...
+}:
+
+let
+  lazygitConfigFile =
+    if pkgs.stdenv.hostPlatform.isDarwin && !config.xdg.enable then
+      "${config.home.homeDirectory}/Library/Application Support/lazygit/config.yml"
+    else
+      "${config.xdg.configHome}/lazygit/config.yml";
+
+  # Configure a self-managed GitLab instance with:
+  # export GITLAB_HOST=https://gitlab.example.com
+  lazygit = pkgs.writeShellScriptBin "lazygit" ''
+    gitlab_host="''${GITLAB_HOST:-}"
+    if [[ -z "$gitlab_host" ]]; then
+      gitlab_host="''${GL_HOST:-}"
+    fi
+
+    if [[ -z "$gitlab_host" ]]; then
+      exec ${unstable.lazygit}/bin/lazygit "$@"
+    fi
+
+    gitlab_host="''${gitlab_host#http://}"
+    gitlab_host="''${gitlab_host#https://}"
+    gitlab_host="''${gitlab_host%/}"
+
+    if [[ ! "$gitlab_host" =~ ^[A-Za-z0-9._-]+(:[0-9]+)?$ ]]; then
+      echo "lazygit: GITLAB_HOST must be a hostname with an optional port" >&2
+      exit 2
+    fi
+
+    gitlab_config="$(${pkgs.coreutils}/bin/mktemp "''${TMPDIR:-/tmp}/lazygit-gitlab.XXXXXX")"
+    trap '${pkgs.coreutils}/bin/rm -f "$gitlab_config"' EXIT
+
+    printf 'services:\n  %s: gitlab:%s\n' "$gitlab_host" "$gitlab_host" > "$gitlab_config"
+
+    base_config="''${LG_CONFIG_FILE:-}"
+    if [[ -z "$base_config" ]]; then
+      base_config="${lazygitConfigFile}"
+    fi
+
+    LG_CONFIG_FILE="$base_config,$gitlab_config" ${unstable.lazygit}/bin/lazygit "$@"
+  '';
+in
 
 {
   programs.lazygit = {
     enable = true;
-    package = unstable.lazygit;
+    package = lazygit;
 
     settings = {
       gui = {
