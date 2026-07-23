@@ -79,21 +79,14 @@ hmobile "このリポジトリの構成を確認して"
 
 ## 日本語を入力できるようにする
 
-このリポジトリは `~/.termux/termux.properties` に次の設定を反映する。
+Nix-on-Droidの通常のターミナル画面は、Gboardの日本語12キーによる直接入力に対応していない。日本語はTermux由来のText Input Viewから入力する。
 
-```properties
-enforce-char-based-input = true
-```
+1. Gboardの「設定」→「言語」→「日本語」で「12キー」を有効にする。
+2. Nix-on-Droidへ戻り、ソフトウェアキーボード上部の特殊キー列（`ESC`、`CTRL`、矢印など）を左へスワイプする。
+3. 表示されたText Input Viewをタップする。通常のテキスト入力欄として扱われるため、Gboardの日本語12キーが表示される。
+4. 日本語を入力してEnterを押すと、入力内容がターミナルへ送信される。コマンドを実行する場合はもう一度Enterを押す。
 
-Android の日本語IMEが生成した文字列を、個別のキーイベントではなく文字としてターミナルへ渡すための設定。既存の `termux.properties` がある場合は、初回activation時に `termux.properties.bak` へ退避する。
-
-`switch` が完了したら設定を再読み込みする。
-
-```shell
-termux-reload-settings
-```
-
-その後、GboardなどのAndroid側キーボードを日本語入力へ切り替える。反映されない場合は、Nix-on-Droidの全セッションを閉じてアプリを起動し直す。
+特殊キー列へ戻すにはText Input Viewを右へスワイプする。
 
 ## 設定を更新する
 
