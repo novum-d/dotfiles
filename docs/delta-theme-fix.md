@@ -39,7 +39,7 @@ includes = [
 以下を確認した。
 
 ```shell
-nix eval ".#darwinConfigurations.novumdnoMac-mini.config.home-manager.users.${USER}.programs.git.includes" --json --impure
+nix eval ".#darwinConfigurations.novumdnoMac-mini.config.home-manager.users.${USER}.programs.git.includes" --json
 ```
 
 評価結果で、include path が次のような Nix store の絶対パスに解決されることを確認した。
@@ -58,7 +58,7 @@ nix eval ".#darwinConfigurations.novumdnoMac-mini.config.home-manager.users.${US
 また、次のビルドが成功した。
 
 ```shell
-nix build .#darwinConfigurations.novumdnoMac-mini.system --impure
+nix build .#darwinConfigurations.novumdnoMac-mini.system
 ```
 
 ## 反映手順
@@ -66,7 +66,7 @@ nix build .#darwinConfigurations.novumdnoMac-mini.system --impure
 修正を実環境へ反映するには、次を実行する。
 
 ```shell
-sudo darwin-rebuild switch --flake .#novumdnoMac-mini --impure
+sudo darwin-rebuild switch --flake .#novumdnoMac-mini
 ```
 
 反映後、次のコマンドで include path とテーマ定義の読み込みを確認できる。

@@ -9,8 +9,8 @@
 - 対象環境でこの dotfiles を clone 済み
 - GitHub CLI (`gh`) が使える
 - GitHub にログインできるブラウザが使える
-- `.env.example` を `.env` にコピーし、`DOTFILES_USERNAME` を設定済み
-- NixOS/WSL では `sudo nixos-rebuild switch --flake .#windows-vm --impure` を実行できる
+- `config/default.nix` にローカルユーザー名を設定済み
+- NixOS/WSL では `sudo nixos-rebuild switch --flake .#windows-vm` を実行できる
 
 ## Nix 設定を反映する
 
@@ -19,19 +19,19 @@
 WSL/NixOS の場合:
 
 ```shell
-sudo nixos-rebuild switch --flake .#windows-vm --impure
+sudo nixos-rebuild switch --flake .#windows-vm
 ```
 
 通常の NixOS の場合:
 
 ```shell
-sudo nixos-rebuild switch --flake .#nixos --impure
+sudo nixos-rebuild switch --flake .#nixos
 ```
 
 macOS の場合:
 
 ```shell
-sudo darwin-rebuild switch --flake .#novumdnoMac-mini --impure
+sudo darwin-rebuild switch --flake .#novumdnoMac-mini
 ```
 
 反映後、`~/.ssh/id_ed25519` と `~/.ssh/id_ed25519.pub` が作成されていることを確認する。

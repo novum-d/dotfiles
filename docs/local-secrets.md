@@ -28,8 +28,8 @@ cp samples/gitconfig.local.sample ~/.gitconfig.local
 NixOSまたはnix-darwinでシステム設定を適用します。
 
 ```sh
-sudo nixos-rebuild switch --flake .#<host> --impure
-sudo darwin-rebuild switch --flake .#<host> --impure
+sudo nixos-rebuild switch --flake .#<host>
+sudo darwin-rebuild switch --flake .#<host>
 ```
 
 ## 確認

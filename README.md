@@ -132,11 +132,12 @@ cp hosts.nix.sample hosts/<端末名>/default.nix
 
 端末名は、任意の名前を付けることができますが、わかりやすい名前を付けることをお勧めします。 例えば、M2 Proを搭載したMacBook Proの場合は、「m2pro」などの名前を付けると良いでしょう。 
 
-続いて、`.env.example` をコピーし、ローカルユーザー名を設定します。`.env` は Git の管理対象外です。
+続いて、`config/default.nix` にローカルユーザー名を設定します。このファイルは秘密情報を含まないPure Nix設定としてGitで管理します。
 
-```shell
-cp .env.example .env
-sed -i '' "s/your_username/$(whoami)/" .env
+```nix
+{
+  username = "your_username";
+}
 ```
 
 ホスト設定には Flake から `username` が渡されます。CPUアーキテクチャに応じて、Apple Siliconを搭載したMacの場合は「aarch64-darwin」、Intelを搭載したMacの場合は「x86_64-darwin」を指定します。
@@ -186,13 +187,13 @@ sed -i '' "s/your_username/$(whoami)/" .env
 最後に、以下のコマンドを実行して、Nix-Darwin を使用してmacOSの設定を適用します。
 
 ```shell
-sudo darwin-rebuild switch --flake . --impure # . または、.#<ホスト名>
+sudo darwin-rebuild switch --flake . # . または、.#<ホスト名>
 ```
 
 正常に設定が適用されたことを確認するために、ターミナルで新しいタブを開いて、以下のコマンドを実行してください。
 
 ```shell
-u # `sudo darwin-rebuild switch --flake . --impure`のエイリアス
+u # `sudo darwin-rebuild switch --flake .`のエイリアス
 ```
 
 問題なく実行できれば、Nix-Darwin を使用してmacOSの設定が適用されたことになります。

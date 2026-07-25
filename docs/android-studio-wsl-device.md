@@ -99,7 +99,7 @@ Home Manager 側では、Nix の `android-tools` を Android SDK 付属の `plat
 設定を反映する。
 
 ```shell
-sudo nixos-rebuild switch --flake .#windows-vm --impure
+sudo nixos-rebuild switch --flake .#windows-vm
 ```
 
 `dbus-broker.service` の reload で一時的に非ゼロ終了する場合がある。再度 `switch` して正常終了するか確認する。
@@ -162,8 +162,8 @@ rg -n "AndroidStudio[0-9]" home/nix/default.nix home/wsl-nixos/default.nix
 変更後は WSL/NixOS 設定を評価してから反映する。
 
 ```shell
-nix eval .#nixosConfigurations.windows-vm.config.system.build.toplevel.drvPath --impure
-sudo nixos-rebuild switch --flake .#windows-vm --impure
+nix eval .#nixosConfigurations.windows-vm.config.system.build.toplevel.drvPath
+sudo nixos-rebuild switch --flake .#windows-vm
 ```
 
 ## トラブルシュート

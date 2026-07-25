@@ -69,8 +69,8 @@
         config.allowUnfree = true;
       };
 
-      env = import ./lib/env.nix { inherit (nixpkgs) lib; };
-      username = env.DOTFILES_USERNAME or (throw "DOTFILES_USERNAME is required in .env.");
+      localConfig = import ./config;
+      inherit (localConfig) username;
     in
     {
       nixOnDroidConfigurations = rec {

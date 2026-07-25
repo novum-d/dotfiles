@@ -139,9 +139,9 @@
       n = "nvim";
       u =
         if pkgs.stdenv.isDarwin then
-          "sudo darwin-rebuild switch --flake . --impure"
+          "sudo darwin-rebuild switch --flake ."
         else
-          "sudo nixos-rebuild switch --flake . --impure";
+          "sudo nixos-rebuild switch --flake .";
     };
   };
 }
