@@ -4,13 +4,11 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    nixpkgs-droid.url =
-      "github:NixOS/nixpkgs/88d3861acdd3d2f0e361767018218e51810df8a1";
+    nixpkgs-droid.url = "github:NixOS/nixpkgs/88d3861acdd3d2f0e361767018218e51810df8a1";
 
     home-manager.url = "github:nix-community/home-manager/release-26.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    home-manager-droid.url =
-      "github:nix-community/home-manager/2539eba97a6df237d75617c25cd2dbef92df3d5b";
+    home-manager-droid.url = "github:nix-community/home-manager/2539eba97a6df237d75617c25cd2dbef92df3d5b";
     home-manager-droid.inputs.nixpkgs.follows = "nixpkgs-droid";
 
     nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-26.05";
@@ -130,6 +128,7 @@
               extraSpecialArgs = {
                 unstable = droidUnstable;
                 guiPkgs = droidUnstable;
+                isNixOnDroid = true;
                 inherit herdr;
               };
               config =
