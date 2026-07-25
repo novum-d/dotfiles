@@ -1,9 +1,5 @@
 # 端末ごとの固有設定のサンプル
-{ pkgs, ... }:
-let
-    # TODO: ここを自分のユーザー名に変更
-    username = "{{YOUR_USERNAME}}";
-in
+{ pkgs, username, ... }:
 {
   nixpkgs.hostPlatform = "aarch64-darwin"; # または "x86_64-darwin"
   system.stateVersion = 6;

@@ -2,6 +2,13 @@
 
 Android 上の Nix-on-Droid にこの dotfiles を導入し、Flake の設定を反映する手順。
 
+## 設定構成
+
+- `hosts/pixel7pro`: Pixel 7 Pro 固有の設定
+- `home/nix-on-droid`: Nix-on-Droid 端末で共有する設定
+- `nixOnDroidConfigurations.pixel7pro`: Pixel 7 Pro 用の Flake 出力
+- `nixOnDroidConfigurations.default`: `pixel7pro` を指す互換用の別名
+
 ## 前提
 
 - `aarch64` の Android 端末に Nix-on-Droid をインストール済み
@@ -38,7 +45,7 @@ nix shell github:NixOS/nixpkgs/nixpkgs-unstable#git \
 
 ```shell
 nix shell github:NixOS/nixpkgs/nixpkgs-unstable#git \
-  --command nix-on-droid switch --flake .
+  --command nix-on-droid switch --flake .#pixel7pro
 ```
 
 activation が最後まで完了したら、新しいターミナルを開いて設定を確認する。設定反映後は、次のエイリアスも使用できる。
@@ -99,7 +106,7 @@ nix shell github:NixOS/nixpkgs/nixpkgs-unstable#git \
   --command git pull
 
 nix shell github:NixOS/nixpkgs/nixpkgs-unstable#git \
-  --command nix-on-droid switch --flake .
+  --command nix-on-droid switch --flake .#pixel7pro
 ```
 
 `util-linux` や `script` は不要。TTY を外側から追加しても、後述の既知不具合は解消しない。

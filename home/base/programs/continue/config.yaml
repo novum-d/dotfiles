@@ -137,14 +137,14 @@ mcpServers:
     args:
       - "-y"
       - "@modelcontextprotocol/server-filesystem"
-      - /Users/novumd/repos
+      - @HOME@/repos
 
   - name: git
     command: uvx
     args:
       - mcp-server-git
       - --repository
-      - /Users/novumd/repos/dotfiles
+      - @HOME@/repos/dotfiles
 
 #  - name: fetch
 #    command: uvx
@@ -163,4 +163,4 @@ experimental:
 #   args:
 #     - mcp-server-sqlite
 #     - --db-path
-#     - /Users/novumd/.continue/mcp.sqlite
+#     - @HOME@/.continue/mcp.sqlite

@@ -1,8 +1,5 @@
 # 端末ごとの固有設定のサンプル
-{ pkgs, ... }:
-let
-  username = "novumd";
-in
+{ pkgs, username, ... }:
 {
   nixpkgs.hostPlatform = "aarch64-darwin"; # または "x86_64-darwin"
   system.stateVersion = 6;

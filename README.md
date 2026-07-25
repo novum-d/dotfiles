@@ -132,18 +132,18 @@ cp hosts.nix.sample hosts/<端末名>/default.nix
 
 端末名は、任意の名前を付けることができますが、わかりやすい名前を付けることをお勧めします。 例えば、M2 Proを搭載したMacBook Proの場合は、「m2pro」などの名前を付けると良いでしょう。 
 
-続いて、コピーしたファイル（`hosts/<端末名>/default.nix`）を編集して、自分の環境に合わせた設定を行います。 
+続いて、`.env.example` をコピーし、ローカルユーザー名を設定します。`.env` は Git の管理対象外です。
 
-ここではユーザー名を変更します。`whoami`コマンドの値を自分のユーザー名に変更してください。  
-また、CPUアーキテクチャに応じて、Apple Siliconを搭載したMacの場合は「aarch64-darwin」、Intelを搭載したMacの場合は「x86_64-darwin」を指定します。
+```shell
+cp .env.example .env
+sed -i '' "s/your_username/$(whoami)/" .env
+```
+
+ホスト設定には Flake から `username` が渡されます。CPUアーキテクチャに応じて、Apple Siliconを搭載したMacの場合は「aarch64-darwin」、Intelを搭載したMacの場合は「x86_64-darwin」を指定します。
 
 ```shell
 # 端末ごとの固有設定のサンプル
-{ ... }:
-let
-    # TODO: ここを自分のユーザー名に変更
-    username = "{{YOUR_USERNAME}}";
-in
+{ username, ... }:
 {
   nixpkgs.hostPlatform = "aarch64-darwin"; # または "x86_64-darwin"
   # ...
@@ -157,7 +157,7 @@ in
 ```shell
 
 {
-  description = "NixOS configuration of novumd";
+  description = "NixOS configuration";
   inputs = {
     # ...
   };
@@ -186,13 +186,13 @@ in
 最後に、以下のコマンドを実行して、Nix-Darwin を使用してmacOSの設定を適用します。
 
 ```shell
-sudo darwin-rebuild switch --flake . # . または、.#<ホスト名>
+sudo darwin-rebuild switch --flake . --impure # . または、.#<ホスト名>
 ```
 
 正常に設定が適用されたことを確認するために、ターミナルで新しいタブを開いて、以下のコマンドを実行してください。
 
 ```shell
-u # `sudo darwin-rebuild switch --flake .`のエイリアス
+u # `sudo darwin-rebuild switch --flake . --impure`のエイリアス
 ```
 
 問題なく実行できれば、Nix-Darwin を使用してmacOSの設定が適用されたことになります。

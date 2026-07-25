@@ -43,7 +43,7 @@ Start-Process -FilePath 'C:\Program Files\usbipd-win\usbipd.exe' -ArgumentList '
 
 ## NixOS 側の設定
 
-`hosts/wsl-nixos/configuration.nix` に USB/IP と ADB 関連の設定を入れる。
+`hosts/windows-vm/default.nix` に VM 固有の USB/IP 設定、`home/wsl-nixos/default.nix` に共有する ADB・Android Studio 設定を入れる。
 
 ```nix
 {
@@ -99,7 +99,7 @@ Home Manager 側では、Nix の `android-tools` を Android SDK 付属の `plat
 設定を反映する。
 
 ```shell
-sudo nixos-rebuild switch --flake .#wsl-nixos
+sudo nixos-rebuild switch --flake .#windows-vm --impure
 ```
 
 `dbus-broker.service` の reload で一時的に非ゼロ終了する場合がある。再度 `switch` して正常終了するか確認する。
@@ -150,20 +150,20 @@ Android Studio の設定ディレクトリ名が変わった場合は、`Android
 - `home/nix/default.nix`
   - `STUDIO_VM_OPTIONS` のパス
   - `home.file.".config/Google/AndroidStudio2026.1.1/studio64.vmoptions"`
-- `hosts/wsl-nixos/configuration.nix`
+- `home/wsl-nixos/default.nix`
   - `androidStudioWsl` 内の `STUDIO_VM_OPTIONS` のパス
 
 確認コマンド:
 
 ```shell
-rg -n "AndroidStudio[0-9]" home/nix/default.nix hosts/wsl-nixos/configuration.nix
+rg -n "AndroidStudio[0-9]" home/nix/default.nix home/wsl-nixos/default.nix
 ```
 
 変更後は WSL/NixOS 設定を評価してから反映する。
 
 ```shell
-nix eval .#nixosConfigurations.wsl-nixos.config.system.build.toplevel.drvPath
-sudo nixos-rebuild switch --flake .#wsl-nixos
+nix eval .#nixosConfigurations.windows-vm.config.system.build.toplevel.drvPath --impure
+sudo nixos-rebuild switch --flake .#windows-vm --impure
 ```
 
 ## トラブルシュート

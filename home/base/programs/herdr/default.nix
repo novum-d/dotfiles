@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   herdr,
@@ -9,11 +10,7 @@ let
   herdrPackage = herdr.packages.${pkgs.stdenv.hostPlatform.system}.default;
   codexModel = "gpt-5.6";
   codexReasoningEffort = "high";
-  vaultPath =
-    if pkgs.stdenv.isDarwin then
-      "/Users/novumd/repos/obsidian/vault"
-    else
-      "/home/novumd/repos/obsidian/vault";
+  vaultPath = "${config.home.homeDirectory}/repos/obsidian/vault";
 
   rolePromptHeader = ''
     This is a continuation of the previous Herdr/Codex multi-agent work unless the task explicitly says otherwise.

@@ -2,33 +2,40 @@
   config,
   pkgs,
   guiPkgs,
+  username,
   ...
 }:
 
-let
-  username = "novumd";
-in
 {
   imports = [
     ./hardware-configuration.nix
     ../../home/nix/configuration.nix
   ];
 
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  boot = {
+    loader = {
+      systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
+    };
+    blacklistedKernelModules = [ "nouveau" ];
+  };
   console.earlySetup = true;
 
-  systemd.user.services.rc-local = {
-    script = ''
-      evtest --grab /dev/input/event0 > /dev/null 2>&1 &
-    '';
-    wantedBy = [ "graphical-session.target" ];
-    partOf = [ "graphical-session.target" ];
+  systemd = {
+    user.services.rc-local = {
+      script = ''
+        evtest --grab /dev/input/event0 > /dev/null 2>&1 &
+      '';
+      wantedBy = [ "graphical-session.target" ];
+      partOf = [ "graphical-session.target" ];
+    };
+    targets = {
+      sleep.enable = false;
+      suspend.enable = false;
+      hibernate.enable = false;
+      hybrid-sleep.enable = false;
+    };
   };
-  systemd.targets.sleep.enable = false;
-  systemd.targets.suspend.enable = false;
-  systemd.targets.hibernate.enable = false;
-  systemd.targets.hybrid-sleep.enable = false;
 
   networking.hostName = "nixos";
   networking.networkmanager.enable = true;
@@ -44,17 +51,45 @@ in
     packages = with pkgs; [ terminus_font ];
   };
 
-  services.xserver = {
-    enable = true;
-    videoDrivers = [ "nvidia" ];
-    xkb.layout = "us";
-    xkb.variant = "";
-    excludePackages = with pkgs; [ xterm ];
+  services = {
+    xserver = {
+      enable = true;
+      videoDrivers = [ "nvidia" ];
+      xkb.layout = "us";
+      xkb.variant = "";
+      excludePackages = with pkgs; [ xterm ];
+    };
+    desktopManager.gnome.enable = true;
+    displayManager.gdm.enable = true;
+    printing.enable = true;
+    pulseaudio.enable = false;
+    pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+    };
+    libinput = {
+      enable = true;
+      touchpad = {
+        accelSpeed = "-0.5";
+        additionalOptions = ''
+          Option "ScrollPixelDistance" "30"
+        '';
+      };
+    };
+    openssh = {
+      enable = true;
+      settings = {
+        X11Forwarding = true;
+        PermitRootLogin = "no";
+        PasswordAuthentication = false;
+      };
+      openFirewall = true;
+    };
+    input-remapper.enable = true;
   };
-  services.desktopManager.gnome.enable = true;
-  services.displayManager.gdm.enable = true;
 
-  boot.blacklistedKernelModules = [ "nouveau" ];
   hardware.graphics.enable = true;
   hardware.nvidia = {
     modesetting.enable = true;
@@ -71,28 +106,9 @@ in
     };
   };
 
-  services.printing.enable = true;
-
-  services.pulseaudio.enable = false;
   security.rtkit.enable = true;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-  };
 
-  services.libinput = {
-    enable = true;
-    touchpad = {
-      accelSpeed = "-0.5";
-      additionalOptions = ''
-        Option "ScrollPixelDistance" "30"
-      '';
-    };
-  };
-
-  users.users.novumd = {
+  users.users."${username}" = {
     extraGroups = [
       "networkmanager"
     ];
@@ -127,17 +143,6 @@ in
     EDITOR = "vim";
     PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
   };
-
-  services.openssh = {
-    enable = true;
-    settings = {
-      X11Forwarding = true;
-      PermitRootLogin = "no";
-      PasswordAuthentication = false;
-    };
-    openFirewall = true;
-  };
-  services.input-remapper.enable = true;
 
   system.stateVersion = "26.05";
 }

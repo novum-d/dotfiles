@@ -1,5 +1,5 @@
 {
-  description = "NixOS configuration of novumd";
+  description = "NixOS configuration";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
@@ -69,87 +69,30 @@
         config.allowUnfree = true;
       };
 
-      droidCodexDuo = droidPkgs.writeShellScriptBin "hcodex-duo" ''
-        set -eu
-
-        if [ "''${HERDR_ENV:-}" != "1" ]; then
-          echo "hcodex-duo: run this inside a Herdr pane" >&2
-          echo "Start Herdr with: herdr" >&2
-          exit 64
-        fi
-
-        suffix="''${HERDR_TEAM_SUFFIX:-$$}"
-
-        herdr agent start "codex-bottom-$suffix" \
-          --cwd "$PWD" \
-          --split down \
-          --focus \
-          -- codex "$@"
-
-        exec codex "$@"
-      '';
+      env = import ./lib/env.nix { inherit (nixpkgs) lib; };
+      username = env.DOTFILES_USERNAME or (throw "DOTFILES_USERNAME is required in .env.");
     in
     {
-      nixOnDroidConfigurations.default = nix-on-droid.lib.nixOnDroidConfiguration {
-        pkgs = droidPkgs;
-        home-manager-path = home-manager-droid.outPath;
+      nixOnDroidConfigurations = rec {
+        pixel7pro = nix-on-droid.lib.nixOnDroidConfiguration {
+          pkgs = droidPkgs;
+          home-manager-path = home-manager-droid.outPath;
 
-        modules = [
-          ./home/nix/termux.nix
-          {
-            environment = {
-              etcBackupExtension = ".bak";
-              packages = with droidPkgs; [
-                coreutils
-                curl
-                diffutils
-                findutils
-                git
-                gnugrep
-                gnused
-                gnutar
-                openssh
-                procps
-                vim
-                wget
-              ];
-            };
-
-            nix.extraOptions = ''
-              experimental-features = nix-command flakes
-            '';
-
-            time.timeZone = "Asia/Tokyo";
-            system.stateVersion = "24.05";
-
-            home-manager = {
-              backupFileExtension = "hm-bak";
-              useGlobalPkgs = true;
-              extraSpecialArgs = {
+          modules = [
+            ./hosts/pixel7pro
+            {
+              home-manager.extraSpecialArgs = {
                 unstable = droidUnstable;
                 guiPkgs = droidUnstable;
                 isNixOnDroid = true;
                 inherit herdr;
               };
-              config =
-                { lib, pkgs, ... }:
-                {
-                  imports = [
-                    ./home/base
-                    ./home/base/programs/tmux
-                  ];
+            }
+          ];
+        };
 
-                  home.packages = [ droidCodexDuo ];
-
-                  programs.zsh.shellAliases = {
-                    u = lib.mkForce "nix-on-droid switch --flake .";
-                    hmobile = lib.mkForce "hcodex-duo";
-                    hphone = "hcodex-duo";
-                  };
-                };
-            };
-          }
-        ];
+        # Keep `nix-on-droid switch --flake .` working for the primary device.
+        default = pixel7pro;
       };
 
       formatter.x86_64-linux = nixosUnstable.writeShellApplication {
@@ -171,6 +114,7 @@
         nixos = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           specialArgs = {
+            inherit username;
             unstable = nixosUnstable;
             guiPkgs = nixosUnstable;
           };
@@ -178,37 +122,44 @@
             ./hosts/xps15/configuration.nix
             home-manager.nixosModules.home-manager
             {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.backupFileExtension = "backup";
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                backupFileExtension = "backup";
 
-              home-manager.extraSpecialArgs = {
-                unstable = nixosUnstable;
-                guiPkgs = nixosUnstable;
-                inherit herdr;
+                extraSpecialArgs = {
+                  unstable = nixosUnstable;
+                  guiPkgs = nixosUnstable;
+                  isNixOnDroid = false;
+                  inherit herdr;
+                };
               };
             }
           ];
         };
-        wsl-nixos = nixpkgs.lib.nixosSystem {
+        windows-vm = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           specialArgs = {
+            inherit username;
             unstable = nixosUnstable;
             guiPkgs = nixosUnstable;
           };
           modules = [
             nixos-wsl.nixosModules.default
-            ./hosts/wsl-nixos/configuration.nix
+            ./hosts/windows-vm
             home-manager.nixosModules.home-manager
             {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.backupFileExtension = "backup";
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                backupFileExtension = "backup";
 
-              home-manager.extraSpecialArgs = {
-                unstable = nixosUnstable;
-                guiPkgs = nixosUnstable;
-                inherit herdr;
+                extraSpecialArgs = {
+                  unstable = nixosUnstable;
+                  guiPkgs = nixosUnstable;
+                  isNixOnDroid = false;
+                  inherit herdr;
+                };
               };
             }
           ];
@@ -218,7 +169,7 @@
         inherit system;
 
         specialArgs = {
-          inherit unstable;
+          inherit unstable username;
           guiPkgs = unstable;
         };
 
@@ -230,20 +181,23 @@
           nix-homebrew.darwinModules.nix-homebrew
 
           {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.backupFileExtension = "backup";
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              backupFileExtension = "backup";
 
-            home-manager.extraSpecialArgs = {
-              inherit unstable;
-              inherit herdr;
-              guiPkgs = unstable;
+              extraSpecialArgs = {
+                inherit unstable;
+                inherit herdr;
+                guiPkgs = unstable;
+                isNixOnDroid = false;
+              };
             };
 
             nix-homebrew = {
               enable = true;
               enableRosetta = true;
-              user = "novumd";
+              user = username;
             };
           }
         ];

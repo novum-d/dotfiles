@@ -1,0 +1,2 @@
+disabled = []
+ignore = ["hosts/xps15/hardware-configuration.nix"]

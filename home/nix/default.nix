@@ -45,51 +45,55 @@ in
     ../base
   ];
 
-  home.packages = with pkgs; [
-    fcitx5WithMozc
-    gcc
-    studio
-    #slack
-    #discord
-    #jetbrains.rust-rover
-  ];
+  home = {
+    packages = with pkgs; [
+      fcitx5WithMozc
+      gcc
+      studio
+      #slack
+      #discord
+      #jetbrains.rust-rover
+    ];
 
-  home.sessionVariables = {
-    GTK_IM_MODULE = "fcitx";
-    QT_IM_MODULE = "fcitx";
-    QT_IM_MODULES = "wayland;fcitx;ibus";
-    XMODIFIERS = "@im=fcitx";
-    SDL_IM_MODULE = "fcitx";
-  };
+    sessionVariables = {
+      GTK_IM_MODULE = "fcitx";
+      QT_IM_MODULE = "fcitx";
+      QT_IM_MODULES = "wayland;fcitx;ibus";
+      XMODIFIERS = "@im=fcitx";
+      SDL_IM_MODULE = "fcitx";
+    };
 
-  home.file.".config/fcitx5/profile" = {
-    force = true;
-    text = ''
-      [Groups/0]
-      Name=Default
-      Default Layout=us
-      DefaultIM=mozc
+    file = {
+      ".config/fcitx5/profile" = {
+        force = true;
+        text = ''
+          [Groups/0]
+          Name=Default
+          Default Layout=us
+          DefaultIM=mozc
 
-      [Groups/0/Items/0]
-      Name=keyboard-us
-      Layout=
+          [Groups/0/Items/0]
+          Name=keyboard-us
+          Layout=
 
-      [Groups/0/Items/1]
-      Name=mozc
-      Layout=
+          [Groups/0/Items/1]
+          Name=mozc
+          Layout=
 
-      [GroupOrder]
-      0=Default
-    '';
-  };
+          [GroupOrder]
+          0=Default
+        '';
+      };
 
-  home.file.".config/Google/AndroidStudio2026.1.1/studio64.vmoptions" = {
-    force = true;
-    text = ''
-      -Dawt.toolkit.name=XToolkit
-      -Dsun.awt.enableInputMethods=true
-      -Djava.awt.im.style=on-the-spot
-    '';
+      ".config/Google/AndroidStudio2026.1.1/studio64.vmoptions" = {
+        force = true;
+        text = ''
+          -Dawt.toolkit.name=XToolkit
+          -Dsun.awt.enableInputMethods=true
+          -Djava.awt.im.style=on-the-spot
+        '';
+      };
+    };
   };
 
   xdg.enable = true;
@@ -110,7 +114,7 @@ in
 
     settings.folders."hrdcr-v7siz" = {
       label = "obsidian";
-      path = "/home/novumd/repos/obsidian";
+      path = "${config.home.homeDirectory}/repos/obsidian";
       devices = [ "pixel7pro" ];
       versioning = {
         type = "trashcan";

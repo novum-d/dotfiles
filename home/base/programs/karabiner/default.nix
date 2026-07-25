@@ -1,6 +1,5 @@
 # Karabiner-Elements設定
-{ ... }:
-{
+_: {
   home.file.".config/karabiner/karabiner.json" = {
     force = true;
     text = builtins.toJSON {

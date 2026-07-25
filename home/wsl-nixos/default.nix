@@ -1,7 +1,6 @@
 { pkgs, unstable, ... }:
 
 let
-  username = "novumd";
   fcitx5WithMozc = pkgs.qt6Packages.fcitx5-with-addons.override {
     addons = with pkgs; [ fcitx5-mozc ];
   };
@@ -67,27 +66,7 @@ let
   '';
 in
 {
-  imports = [
-    ../../home/nix/configuration.nix
-  ];
-
-  wsl = {
-    enable = true;
-    defaultUser = username;
-    startMenuLaunchers = true;
-    useWindowsDriver = true;
-    usbip = {
-      enable = true;
-      autoAttach = [ "4-7" ];
-    };
-    wslConf = {
-      automount.root = "/mnt";
-      interop.appendWindowsPath = true;
-      network.hostname = "wsl-nixos";
-    };
-  };
-
-  networking.hostName = "wsl-nixos";
+  imports = [ ../nix/configuration.nix ];
 
   i18n.inputMethod = {
     enable = true;
@@ -121,16 +100,16 @@ in
     SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", MODE:="0666", TAG+="uaccess"
   '';
 
-  environment.systemPackages = with pkgs; [
-    kmod
-    dbus
-    usbutils
-    fcitx5WithMozc
-    android-tools
-    androidStudioWsl
-    wslOpen
-  ];
-  environment.variables.BROWSER = "wsl-open";
-
-  system.stateVersion = "26.05";
+  environment = {
+    systemPackages = with pkgs; [
+      kmod
+      dbus
+      usbutils
+      fcitx5WithMozc
+      android-tools
+      androidStudioWsl
+      wslOpen
+    ];
+    variables.BROWSER = "wsl-open";
+  };
 }
