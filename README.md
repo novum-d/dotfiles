@@ -1,201 +1,56 @@
-# Nix-Darwin & Nix Flake を使用してmacOSを管理するためのdotfiles
+# dotfiles
 
-このリポジトリは、 Nix-Darwin と Nix Flake を使用してmacOSを管理するためのdotfilesを提供しています。 これらのdotfilesは、Nix-Darwin を使用してmacOSの設定やパッケージ管理を行うための基本的な構成を含んでいます。
+Nix Flakeを使用して、macOS、NixOS、WSL、Nix-on-Droidのシステム設定とユーザー環境を管理するdotfilesです。
 
-Androidへの導入方法は、[Nix-on-Droid セットアップ手順](docs/nix-on-droid.md)を参照してください。
+## 対応環境
 
-## 1. Determinate Systems からNix をインストールする
+| 環境 | Flake出力 | ホスト設定 |
+| --- | --- | --- |
+| macOS | `darwinConfigurations.novumdnoMac-mini` | `hosts/Mac-mini` |
+| NixOS | `nixosConfigurations.nixos` | `hosts/xps15` |
+| WSL | `nixosConfigurations.windows-vm` | `hosts/windows-vm` |
+| Nix-on-Droid | `nixOnDroidConfigurations.pixel7pro` | `hosts/pixel7pro` |
 
-Nixをインストールする方法として、他に公式のインストーラーやLixなどもありますが、 今回は[uninstaller](https://zero-to-nix.com/start/uninstall/)を提供していたり、Nix Flakeが最初から有効化されているなど...なにかと便利な[Determinate Systems](https://docs.determinate.systems/determinate-nix/) からNix をインストールする方法を紹介します。
+## 構成
 
-以下のスクリプトをターミナルで実行することで、Determinate Systems経由でNix をインストールできます。
+- `config`: Flake全体で共有する、秘密情報を含まないPure Nix設定
+- `hosts`: 端末固有のシステム設定
+- `home/base`: 全環境で共有するHome Manager設定
+- `home/darwin`: macOS共通設定
+- `home/nix`: NixOS共通設定
+- `home/wsl-nixos`: WSL共通設定
+- `home/nix-on-droid`: Nix-on-Droid共通設定
+- `docs`: 環境別のセットアップ手順と運用メモ
 
-```shell
-curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
-```
+ユーザー名は [`config/default.nix`](config/default.nix) で一元管理し、Flake評価時に各ホストへ渡します。このファイルには秘密情報を保存しません。
 
-インストールが完了したら、以下のコマンドを実行してNixのバージョンを確認してください。
+## セットアップ
 
-```shell
-nix --version                                     
-```
+- [Macセットアップ手順](docs/macos-setup.md)
+- [Nix-on-Droidセットアップ手順](docs/nix-on-droid.md)
 
-以下のようにバージョンが表示されれば、Nixのインストールは成功です。
+## 関連ドキュメント
 
-```shell
-$ nix --version                                     
-nix (Determinate Nix 3.17.0) 2.33.3
-```
+- [GitHub SSH設定](docs/github-ssh.md)
+- [ローカル個人情報の分離](docs/local-secrets.md)
+- [WSL上のAndroid Studioと実機接続](docs/android-studio-wsl-device.md)
+- [Deltaのテーマ設定](docs/delta-theme-fix.md)
 
-## 2. Nix Flake を使用してNix-Darwin をインストールする
+## AIエージェント向け作業ルール
 
-Nixのパッケージ・システム設定を再現可能にするNix Flake を使用してmacOS用のNix「Nix-Darwin」をインストールします。
+- [`AGENTS.md`](AGENTS.md): Codexが自動的に読み込むリポジトリ共通の指示
+- [`prompt.md`](prompt.md): モジュール配置、Pure Nix、検証、Git運用の詳細ガイド
 
-```shell
-# Nix-Darwin をインストールするためのディレクトリを作成
-sudo mkdir -p /etc/nix-darwin
+## 基本的な検証
 
-# 所有者を現在のユーザーに変更
-sudo chown $(id -nu):$(id -ng) /etc/nix-darwin
-
-# Nix Flake を初期化して、Nix-Darwin 用のテンプレートファイルを作成
-cd /etc/nix-darwin
-nix flake init -t nix-darwin/nix-darwin-26.05
-sed -i '' "s/simple/$(scutil --get LocalHostName)/" flake.nix
-```
-
-Nix Flakeの設定ファイルを編集し、macOS用のNix「Nix-Darwin」との競合を避けるため、通常のNixの設定を無効化します。
-
-```shell
-{
-  description = "Example nix-darwin system flake";
-
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-26.05-darwin";
-    nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-26.05";
-    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
-  };
-
-  outputs = inputs@{ self, nix-darwin, nixpkgs }:
-  let
-    configuration = { pkgs, ... }: {
-      nix.enable = false; # ← 通常のNixの設定を無効化
-      # ...
-```
-
-Nix Flakeの設定ファイルを保存したら、以下のコマンドを実行してNix-Darwin をインストールします。
+リポジトリ全体のFlake出力を評価します。
 
 ```shell
-sudo nix run nix-darwin/nix-darwin-26.05#darwin-rebuild -- switch
+nix flake check --no-build
 ```
 
-> [!WARNING]
->  自身で設定している.zshrcファイルがある場合、Nix-Darwin のインストール中に競合する可能性があるため、事前にバックアップを取ることをお勧めします。
-> ```
-> mv ~/.zshrc ~/.zshrc.bak
-> ```
-
-インストール完了後、ターミナルで新しいタブを開いて、以下のコマンドを実行を実行できることを確認してください。
+Nixファイルのフォーマットを確認します。
 
 ```shell
-sudo darwin-rebuild switch --flake .     
+nix shell nixpkgs#nixfmt --command nixfmt --check $(git ls-files '*.nix')
 ```
-
-## 3. Nix-Darwin を使用したdotfilesをリポジトリからダウンロードする
-
-設定を簡易化するために、Nix-Darwin を使用したdotfilesをダウンロードします。
-
-```shell
-mkdir -p ~/repos
-cd ~/repos
-git clone git@github.com:novum-d/dotfiles.git
-```
-
-## 4. Nix-Darwin を使用してmacOSの設定を管理する
-
-まずは、全体のディレクトリ構成を確認してみましょう。
-
-```shell
-.
-├── ...
-├── hosts.nix.sample
-├── flake.lock
-├── flake.nix
-├── home # 各プラットフォームのユーザーレベル（ホーム）の設定
-│   ├── base # 全OS共通のパッケージ設定
-│   │   ├── default.nix
-│   │   └── programs # 各種プログラムの設定
-│   │       ├── git
-│   │       │   ├── commit_message.txt
-│   │       │   └── default.nix
-│   │       ├── lazyvim
-│   │       │   └── default.nix
-│   │       └── zsh
-│   │           ├── default.nix
-│   │           └── p10k-config
-│   │               └── p10k.zsh
-│   └── darwin # macOS共通のパッケージ設定
-│       └── default.nix
-└── hosts # 端末ごとの固有設定（ハードウェア、ユーザー設定など）
-    └── m2pro
-        └── default.nix
-```
-
-あらゆるプラットフォーム・パッケージの設定が共通化されており、端末ごとの固有設定は「hosts」ディレクトリに配置されていることがわかります。
-
-ここでは、使用する環境で個々に分かれる「端末ごとの固有設定（ハードウェア、ユーザー設定など）」をサンプルファイルからコピーして新たに自分用に作成します。
-
-```shell
-cd ~/repos/dotfiles
-cp hosts.nix.sample hosts/<端末名>/default.nix
-```
-
-端末名は、任意の名前を付けることができますが、わかりやすい名前を付けることをお勧めします。 例えば、M2 Proを搭載したMacBook Proの場合は、「m2pro」などの名前を付けると良いでしょう。 
-
-続いて、`config/default.nix` にローカルユーザー名を設定します。このファイルは秘密情報を含まないPure Nix設定としてGitで管理します。
-
-```nix
-{
-  username = "your_username";
-}
-```
-
-ホスト設定には Flake から `username` が渡されます。CPUアーキテクチャに応じて、Apple Siliconを搭載したMacの場合は「aarch64-darwin」、Intelを搭載したMacの場合は「x86_64-darwin」を指定します。
-
-```shell
-# 端末ごとの固有設定のサンプル
-{ username, ... }:
-{
-  nixpkgs.hostPlatform = "aarch64-darwin"; # または "x86_64-darwin"
-  # ...
-}
-```
-
-設定が完了したら、flake.nixのoutputsセクションを編集して、自身（ホスト）を追加しましょう。 ここでは、固有のホスト名を指定して、Nix-Darwin の設定を追加します。
-
-ホスト名は、`hostname`コマンドで確認できます。
-
-```shell
-
-{
-  description = "NixOS configuration";
-  inputs = {
-    # ...
-  };
-  outputs =
-    inputs@{
-        # ...
-    }:
-    {
-      darwinConfigurations.m2pro = nix-darwin.lib.darwinSystem {
-        # ...
-      };
-      darwinConfigurations."<ホスト名>" = nix-darwin.lib.darwinSystem {
-        modules = [
-          ./hosts/m2pro
-          ./home/darwin
-          home-manager.darwinModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-          }
-        ];
-      };
-    };
-}
-```
-最後に、以下のコマンドを実行して、Nix-Darwin を使用してmacOSの設定を適用します。
-
-```shell
-sudo darwin-rebuild switch --flake . # . または、.#<ホスト名>
-```
-
-正常に設定が適用されたことを確認するために、ターミナルで新しいタブを開いて、以下のコマンドを実行してください。
-
-```shell
-u # `sudo darwin-rebuild switch --flake .`のエイリアス
-```
-
-問題なく実行できれば、Nix-Darwin を使用してmacOSの設定が適用されたことになります。
-
-設定おつかれさまでした...! よき、Nix-Darwin ライフを...! 🚀
