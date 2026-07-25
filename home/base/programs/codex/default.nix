@@ -7,6 +7,11 @@
 }:
 
 let
+  primaryModel = "gpt-5.6-sol";
+  primaryReasoningEffort = "high";
+  fallbackModel = "gpt-5.5";
+  fallbackReasoningEffort = "high";
+
   legacyIsatty = pkgs.runCommandCC "codex-legacy-isatty" { } ''
     mkdir -p "$out/lib"
     "$CC" \
@@ -65,7 +70,48 @@ let
     exec ${unstable.codex}/bin/.codex-wrapped "$@"
   '';
 
-  codexPackage = if isNixOnDroid then codexForNixOnDroid else unstable.codex;
+  codexBasePackage = if isNixOnDroid then codexForNixOnDroid else unstable.codex;
+
+  codexWithFallback = pkgs.writeShellApplication {
+    name = "codex";
+    runtimeInputs = [ pkgs.jq ];
+    text = ''
+      preferred_model="${primaryModel}"
+      preferred_reasoning_effort="${primaryReasoningEffort}"
+      fallback_model="${fallbackModel}"
+      fallback_reasoning_effort="${fallbackReasoningEffort}"
+      selected_model="$preferred_model"
+      selected_reasoning_effort="$preferred_reasoning_effort"
+
+      model_catalog="$(${codexBasePackage}/bin/codex debug models 2>/dev/null)" || model_catalog=""
+
+      if [ -n "$model_catalog" ] &&
+        ! jq -e \
+          --arg model "$preferred_model" \
+          --arg effort "$preferred_reasoning_effort" \
+          '.models | any(.slug == $model and (.supported_reasoning_levels | any(.effort == $effort)))' \
+          >/dev/null <<<"$model_catalog"
+      then
+        if jq -e \
+          --arg model "$fallback_model" \
+          --arg effort "$fallback_reasoning_effort" \
+          '.models | any(.slug == $model and (.supported_reasoning_levels | any(.effort == $effort)))' \
+          >/dev/null <<<"$model_catalog"
+        then
+          selected_model="$fallback_model"
+          selected_reasoning_effort="$fallback_reasoning_effort"
+          echo "codex: $preferred_model/$preferred_reasoning_effort is unavailable; using $fallback_model/$fallback_reasoning_effort" >&2
+        else
+          echo "codex: neither $preferred_model/$preferred_reasoning_effort nor $fallback_model/$fallback_reasoning_effort is available; trying the preferred model" >&2
+        fi
+      fi
+
+      exec ${codexBasePackage}/bin/codex \
+        -m "$selected_model" \
+        -c "model_reasoning_effort=\"$selected_reasoning_effort\"" \
+        "$@"
+    '';
+  };
 in
 {
   home.packages = with pkgs; [
@@ -85,12 +131,12 @@ in
     enable = true;
     # glibc 2.42 uses TCGETS2 for isatty(), but the PRoot bundled with
     # Nix-on-Droid 24.05 does not emulate it. Use the legacy TCGETS path whenever Codex starts on Nix-on-Droid.
-    package = codexPackage;
+    package = codexWithFallback;
     settings = {
       approval_policy = "on-request";
       approvals_reviewer = "auto_review";
-      model = "gpt-5.6-sol";
-      model_reasoning_effort = "high";
+      model = primaryModel;
+      model_reasoning_effort = primaryReasoningEffort;
       projects = {
         "${config.home.homeDirectory}" = {
           trust_level = "trusted";

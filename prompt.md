@@ -78,6 +78,13 @@ Home Managerの共通設定は `home/base` に集約し、OSや端末に固有�
 - AI系CLIは、特別な理由がない限り `nixpkgs-unstable` の `unstable` から取得する。
 - 同じパッケージをsystem packages、Home Manager、Homebrewへ重複配置しない。
 
+### CodexとHerdr
+
+- CodexとHerdrロールの既定モデルは `gpt-5.6-sol`、reasoning effortは `high` とする。
+- 利用可能モデル一覧に既定モデルがない場合だけ `gpt-5.5`、`high` へフォールバックする。
+- モデル一覧を取得できない場合は、ネットワーク障害などをモデル未提供と誤認せず、既定モデルで起動を試みる。
+- Herdrロールは、作業ディレクトリとロールが一致する直近のCodexセッションを再開する。PM、Architect、iOSなど異なるロールの履歴を混在させない。
+
 ### シェルスクリプト
 
 - 再現可能なコマンドは `pkgs.writeShellScriptBin` を優先する。

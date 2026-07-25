@@ -8,18 +8,27 @@
 
 let
   herdrPackage = herdr.packages.${pkgs.stdenv.hostPlatform.system}.default;
-  codexModel = "gpt-5.6";
+  codexModel = "gpt-5.6-sol";
   codexReasoningEffort = "high";
+  codexFallbackModel = "gpt-5.5";
+  codexFallbackReasoningEffort = "high";
   vaultPath = "${config.home.homeDirectory}/repos/obsidian/vault";
 
   rolePromptHeader = ''
     This is a continuation of the previous Herdr/Codex multi-agent work unless the task explicitly says otherwise.
     Continue from the existing repository state, shell context, role setup, and prior decisions instead of restarting from scratch.
-    The launcher selects Codex model ${codexModel} with ${codexReasoningEffort} reasoning effort. If the visible Codex session reports a different model or reasoning effort, call that out before doing substantive work.
+    The launcher prefers Codex model ${codexModel} with ${codexReasoningEffort} reasoning effort and falls back to ${codexFallbackModel} with ${codexFallbackReasoningEffort} reasoning effort only when the preferred model is unavailable. If the visible Codex session reports a different model or reasoning effort, call that out before doing substantive work.
+  '';
+
+  rolePrompt = role: text: ''
+    Herdr continuity key: codex-role/${role}
+
+    ${rolePromptHeader}
+    ${text}
   '';
 
   rolePrompts = {
-    pm = rolePromptHeader + ''
+    pm = rolePrompt "pm" ''
       You are Codex acting as a Product Manager in a multi-agent workspace.
 
       Focus on user value, scope, tradeoffs, sequencing, acceptance criteria, and decision records.
@@ -29,7 +38,7 @@ let
       Default to Japanese for summaries and user-facing deliverables unless the repository or task requires another language.
     '';
 
-    ios = rolePromptHeader + ''
+    ios = rolePrompt "ios" ''
       You are Codex acting as an iOS engineer in a multi-agent workspace.
 
       Focus on Swift, SwiftUI, UIKit, Xcode project structure, Apple platform conventions, app architecture, and testability.
@@ -39,7 +48,7 @@ let
       Default to Japanese for summaries and user-facing deliverables unless the repository or task requires another language.
     '';
 
-    android = rolePromptHeader + ''
+    android = rolePrompt "android" ''
       You are Codex acting as an Android engineer in a multi-agent workspace.
 
       Focus on Kotlin, Jetpack Compose, Gradle, Android platform behavior, app architecture, and testability.
@@ -49,7 +58,7 @@ let
       Default to Japanese for summaries and user-facing deliverables unless the repository or task requires another language.
     '';
 
-    backend = rolePromptHeader + ''
+    backend = rolePrompt "backend" ''
       You are Codex acting as a backend engineer in a multi-agent workspace.
 
       Focus on API contracts, data modeling, reliability, observability, security, deployment, and maintainability.
@@ -59,7 +68,7 @@ let
       Default to Japanese for summaries and user-facing deliverables unless the repository or task requires another language.
     '';
 
-    web = rolePromptHeader + ''
+    web = rolePrompt "web" ''
       You are Codex acting as a web/frontend engineer in a multi-agent workspace.
 
       Focus on UI behavior, accessibility, responsive layout, state management, performance, and product polish.
@@ -69,7 +78,7 @@ let
       Default to Japanese for summaries and user-facing deliverables unless the repository or task requires another language.
     '';
 
-    qa = rolePromptHeader + ''
+    qa = rolePrompt "qa" ''
       You are Codex acting as a QA/test engineer in a multi-agent workspace.
 
       Focus on test strategy, regression risk, acceptance criteria, edge cases, automation gaps, and reproducible verification.
@@ -79,7 +88,7 @@ let
       Default to Japanese for summaries and user-facing deliverables unless the repository or task requires another language.
     '';
 
-    architect = rolePromptHeader + ''
+    architect = rolePrompt "architect" ''
       You are Codex acting as a software architect in a multi-agent workspace.
 
       Focus on system boundaries, dependency direction, data flow, maintainability, migration paths, and long-term tradeoffs.
@@ -89,7 +98,7 @@ let
       Default to Japanese for summaries and user-facing deliverables unless the repository or task requires another language.
     '';
 
-    reviewer = rolePromptHeader + ''
+    reviewer = rolePrompt "reviewer" ''
       You are Codex acting as a code reviewer in a multi-agent workspace.
 
       Focus on correctness, regressions, security, maintainability, test gaps, and user-visible behavior changes.
@@ -119,6 +128,7 @@ let
     role="$1"
     shift
     role_file="''${XDG_CONFIG_HOME:-$HOME/.config}/codex/roles/$role.md"
+    workspace="$(pwd -P)"
 
     if [ ! -r "$role_file" ]; then
       echo "codex-role: unknown role '$role'" >&2
@@ -126,18 +136,66 @@ let
       exit 64
     fi
 
-    prompt="$(cat "$role_file")"
+    case "$role" in
+      pm) legacy_marker="You are Codex acting as a Product Manager" ;;
+      ios) legacy_marker="You are Codex acting as an iOS engineer" ;;
+      android) legacy_marker="You are Codex acting as an Android engineer" ;;
+      backend) legacy_marker="You are Codex acting as a backend engineer" ;;
+      web) legacy_marker="You are Codex acting as a web/frontend engineer" ;;
+      qa) legacy_marker="You are Codex acting as a QA/test engineer" ;;
+      architect) legacy_marker="You are Codex acting as a software architect" ;;
+      reviewer) legacy_marker="You are Codex acting as a code reviewer" ;;
+    esac
 
+    continuity_marker="Herdr continuity key: codex-role/$role"
+    codex_home="''${CODEX_HOME:-$HOME/.codex}"
+    state_db=""
+    session_id=""
+
+    for candidate in "$codex_home"/state_*.sqlite; do
+      if [ -f "$candidate" ] && { [ -z "$state_db" ] || [ "$candidate" -nt "$state_db" ]; }; then
+        state_db="$candidate"
+      fi
+    done
+
+    if [ -n "$state_db" ]; then
+      workspace_sql="$(printf '%s' "$workspace" | ${pkgs.gnused}/bin/sed "s/'/&&/g")"
+      continuity_marker_sql="$(printf '%s' "$continuity_marker" | ${pkgs.gnused}/bin/sed "s/'/&&/g")"
+      legacy_marker_sql="$(printf '%s' "$legacy_marker" | ${pkgs.gnused}/bin/sed "s/'/&&/g")"
+      session_id="$(${pkgs.sqlite}/bin/sqlite3 -readonly "$state_db" "
+        SELECT id
+        FROM threads
+        WHERE archived = 0
+          AND cwd = '$workspace_sql'
+          AND (
+            instr(first_user_message, '$continuity_marker_sql') > 0
+            OR instr(first_user_message, '$legacy_marker_sql') > 0
+          )
+        ORDER BY recency_at_ms DESC, id DESC
+        LIMIT 1;
+      " 2>/dev/null || true)"
+    fi
+
+    task=""
     if [ "$#" -gt 0 ]; then
       task="$*"
+    fi
+
+    if [ -n "$session_id" ]; then
+      if [ -n "$task" ]; then
+        exec codex resume -C "$workspace" "$session_id" "$task"
+      else
+        exec codex resume -C "$workspace" "$session_id"
+      fi
+    fi
+
+    prompt="$(cat "$role_file")"
+
+    if [ -n "$task" ]; then
       prompt="$(printf '%s\n\nTask:\n%s' "$prompt" "$task")"
     fi
 
-    exec codex \
-      -m ${codexModel} \
-      -c 'model_reasoning_effort="${codexReasoningEffort}"' \
-      -C "$PWD" \
-      "$prompt"
+    exec codex -C "$workspace" "$prompt"
   '';
 
   herdrCodexRole = pkgs.writeShellScriptBin "herdr-codex-role" ''
