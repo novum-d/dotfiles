@@ -127,6 +127,40 @@ nix flake check --no-build
 
 Git設定の確認結果に `~/.gitconfig.local` が含まれていれば、ローカル情報の分離も完了しています。
 
+## Obsidian GTDをGoogle Driveへ同期する
+
+macOS構成には、ローカルの `~/repos/obsidian/vault/GTD` を毎週月曜日の12:00に `gdrive:GTD` へ一方向同期するlaunchdジョブが含まれます。事前に次のコマンドで `gdrive` remoteを設定してください。認証トークンはGit管理せず、rcloneのユーザー設定へ保存します。
+
+```shell
+rclone config
+rclone lsd gdrive:
+```
+
+このジョブは `rclone sync` を使用するため、ローカルで削除したファイルはGoogle Drive側からも削除されます。Google Driveのゴミ箱を明示的に使用し、1回の実行で100件を超える削除は停止します。初回や大きな整理の後は、適用前にdry-runで削除対象を確認してください。
+
+```shell
+rclone sync ~/repos/obsidian/vault/GTD gdrive:GTD \
+  --check-first \
+  --create-empty-src-dirs \
+  --delete-after \
+  --drive-use-trash \
+  --max-delete 100 \
+  --dry-run
+```
+
+設定適用後、ジョブを手動実行する場合は次を使用します。
+
+```shell
+launchctl kickstart -k "gui/$(id -u)/org.nixos.obsidian-gtd-google-drive-sync"
+```
+
+実行結果は次のログで確認できます。
+
+```shell
+tail -f ~/Library/Logs/obsidian-gtd-google-drive-sync.log
+tail -f ~/Library/Logs/obsidian-gtd-google-drive-sync.error.log
+```
+
 ## トラブルシューティング
 
 ### `Git tree ... has uncommitted changes`
