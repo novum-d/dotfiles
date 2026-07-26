@@ -86,7 +86,11 @@ hmobile "このリポジトリの構成を確認して"
 
 各ロールは、同じ作業ディレクトリで前回使用した同じロールのCodexセッションを自動的に再開する。たとえばPMは前回のPM、iOSは前回のiOSの履歴を引き継ぎ、ロール間では共有しない。引数を指定した場合は、再開したセッションへの新しい依頼として渡される。
 
+`hmobile` はPM、Architect、iOSに同じ起動サフィックスを持つ専用のHerdrエージェント名を使う。実行元のペインも `codex-pm-<suffix>` に更新される。起動プロンプトを変更した場合は名前のrevisionも更新し、古い mobile duo セッションを再利用しない。
+
 Codexと各Herdrロールは `gpt-5.6-sol`、reasoning effort `high` を使用する。利用可能モデル一覧にこの組み合わせがない場合だけ、`gpt-5.5`、`high` へフォールバックする。
+
+通常の開始報告ではモデル名やreasoning effortを表示しない。確認が必要な場合は、セッション内の `CODEX_CONFIGURED_MODEL` と `CODEX_CONFIGURED_REASONING_EFFORT` を使用する。Codexのベース指示に表示される「GPT-5」はモデルファミリーの表記であり、実効モデルが `gpt-5.6-sol` ではないことを意味しない。
 
 ## 日本語を入力できるようにする
 

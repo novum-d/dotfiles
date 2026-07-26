@@ -106,6 +106,9 @@ let
         fi
       fi
 
+      export CODEX_CONFIGURED_MODEL="$selected_model"
+      export CODEX_CONFIGURED_REASONING_EFFORT="$selected_reasoning_effort"
+
       exec ${codexBasePackage}/bin/codex \
         -m "$selected_model" \
         -c "model_reasoning_effort=\"$selected_reasoning_effort\"" \

@@ -5,6 +5,12 @@
 }:
 
 let
+  duoPromptHeader = ''
+    This is a continuation of the previous Herdr/Codex mobile duo work unless the task explicitly says otherwise.
+    Continue from the existing repository state, shell context, and prior decisions instead of restarting from scratch.
+    Do not mention, compare, or report the model or reasoning effort unless the user explicitly asks about them.
+  '';
+
   droidCodexDuo = pkgs.writeShellScriptBin "hcodex-duo" ''
     set -eu
 
@@ -15,14 +21,20 @@ let
     fi
 
     suffix="''${HERDR_TEAM_SUFFIX:-$$}"
+    agent_name="codex-bottom-v3-$suffix"
+    prompt="${duoPromptHeader}"
 
-    herdr agent start "codex-bottom-$suffix" \
+    if [ "$#" -gt 0 ]; then
+      prompt="$(printf '%s\n\nTask:\n%s' "$prompt" "$*")"
+    fi
+
+    herdr agent start "$agent_name" \
       --cwd "$PWD" \
       --split down \
       --focus \
-      -- codex "$@"
+      -- codex "$prompt"
 
-    exec codex "$@"
+    exec codex "$prompt"
   '';
 in
 {

@@ -8,20 +8,15 @@
 
 let
   herdrPackage = herdr.packages.${pkgs.stdenv.hostPlatform.system}.default;
-  codexModel = "gpt-5.6-sol";
-  codexReasoningEffort = "high";
-  codexFallbackModel = "gpt-5.5";
-  codexFallbackReasoningEffort = "high";
+  rolePromptRevision = "4";
   vaultPath = "${config.home.homeDirectory}/repos/obsidian/vault";
 
   rolePromptHeader = ''
-    This is a continuation of the previous Herdr/Codex multi-agent work unless the task explicitly says otherwise.
-    Continue from the existing repository state, shell context, role setup, and prior decisions instead of restarting from scratch.
-    The launcher prefers Codex model ${codexModel} with ${codexReasoningEffort} reasoning effort and falls back to ${codexFallbackModel} with ${codexFallbackReasoningEffort} reasoning effort only when the preferred model is unavailable. If the visible Codex session reports a different model or reasoning effort, call that out before doing substantive work.
+    Do not mention, compare, or report the model or reasoning effort unless the user explicitly asks about them.
   '';
 
   rolePrompt = role: text: ''
-    Herdr continuity key: codex-role/${role}
+    Herdr continuity key: codex-role/${role}/rev-${rolePromptRevision}
 
     ${rolePromptHeader}
     ${text}
@@ -136,21 +131,11 @@ let
       exit 64
     fi
 
-    case "$role" in
-      pm) legacy_marker="You are Codex acting as a Product Manager" ;;
-      ios) legacy_marker="You are Codex acting as an iOS engineer" ;;
-      android) legacy_marker="You are Codex acting as an Android engineer" ;;
-      backend) legacy_marker="You are Codex acting as a backend engineer" ;;
-      web) legacy_marker="You are Codex acting as a web/frontend engineer" ;;
-      qa) legacy_marker="You are Codex acting as a QA/test engineer" ;;
-      architect) legacy_marker="You are Codex acting as a software architect" ;;
-      reviewer) legacy_marker="You are Codex acting as a code reviewer" ;;
-    esac
-
-    continuity_marker="Herdr continuity key: codex-role/$role"
+    continuity_marker="Herdr continuity key: codex-role/$role/rev-${rolePromptRevision}"
     codex_home="''${CODEX_HOME:-$HOME/.codex}"
     state_db=""
     session_id=""
+    session_rollout=""
 
     for candidate in "$codex_home"/state_*.sqlite; do
       if [ -f "$candidate" ] && { [ -z "$state_db" ] || [ "$candidate" -nt "$state_db" ]; }; then
@@ -161,19 +146,25 @@ let
     if [ -n "$state_db" ]; then
       workspace_sql="$(printf '%s' "$workspace" | ${pkgs.gnused}/bin/sed "s/'/&&/g")"
       continuity_marker_sql="$(printf '%s' "$continuity_marker" | ${pkgs.gnused}/bin/sed "s/'/&&/g")"
-      legacy_marker_sql="$(printf '%s' "$legacy_marker" | ${pkgs.gnused}/bin/sed "s/'/&&/g")"
       session_id="$(${pkgs.sqlite}/bin/sqlite3 -readonly "$state_db" "
         SELECT id
         FROM threads
         WHERE archived = 0
           AND cwd = '$workspace_sql'
-          AND (
-            instr(first_user_message, '$continuity_marker_sql') > 0
-            OR instr(first_user_message, '$legacy_marker_sql') > 0
-          )
+          AND instr(first_user_message, '$continuity_marker_sql') > 0
         ORDER BY recency_at_ms DESC, id DESC
         LIMIT 1;
       " 2>/dev/null || true)"
+
+      if [ -n "$session_id" ]; then
+        session_id_sql="$(printf '%s' "$session_id" | ${pkgs.gnused}/bin/sed "s/'/&&/g")"
+        session_rollout="$(${pkgs.sqlite}/bin/sqlite3 -readonly "$state_db" "
+          SELECT rollout_path
+          FROM threads
+          WHERE id = '$session_id_sql'
+          LIMIT 1;
+        " 2>/dev/null || true)"
+      fi
     fi
 
     task=""
@@ -182,10 +173,34 @@ let
     fi
 
     if [ -n "$session_id" ]; then
+      session_command="resume"
+
+      if [ -r "$session_rollout" ]; then
+        last_terminal_event="$(
+          ${pkgs.jq}/bin/jq -r '
+            select(
+              .type == "event_msg"
+              and (
+                .payload.type == "task_complete"
+                or .payload.type == "turn_aborted"
+              )
+            )
+            | .payload.type
+          ' "$session_rollout" 2>/dev/null \
+            | ${pkgs.coreutils}/bin/tail -n 1 \
+            || true
+        )"
+
+        if [ "$last_terminal_event" = "turn_aborted" ]; then
+          session_command="fork"
+          echo "codex-role: forking interrupted $role session to preserve its history" >&2
+        fi
+      fi
+
       if [ -n "$task" ]; then
-        exec codex resume -C "$workspace" "$session_id" "$task"
+        exec codex "$session_command" -C "$workspace" "$session_id" "$task"
       else
-        exec codex resume -C "$workspace" "$session_id"
+        exec codex "$session_command" -C "$workspace" "$session_id"
       fi
     fi
 
@@ -238,6 +253,8 @@ let
     fi
 
     suffix="''${HERDR_TEAM_SUFFIX:-$$}"
+
+    ${herdrPackage}/bin/herdr agent rename "$HERDR_PANE_ID" "codex-pm-$suffix"
 
     ${herdrPackage}/bin/herdr agent start "codex-architect-$suffix" \
       --cwd "$PWD" \

@@ -27,6 +27,7 @@
 - `home/nix/default.nix`: Linux系Home Manager設定
 - `home/wsl-nixos`: WSL固有設定
 - `home/nix-on-droid`: Nix-on-Droid固有設定
+- `docs`: 環境別の導入・復旧・運用手順
 
 ## 必須検証
 
