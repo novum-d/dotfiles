@@ -371,7 +371,7 @@ in
       hvault3 = "hvault";
     };
 
-    initContent = ''
+    initContent = lib.mkOrder 2100 ''
       hagent() {
         if [[ $# -lt 2 ]]; then
           echo "usage: hagent <name> <command> [args...]" >&2
@@ -382,6 +382,11 @@ in
         shift
         herdr agent start "$name" --cwd "$PWD" -- "$@"
       }
+
+      # Herdr panes set HERDR_ENV, so only the top-level terminal starts the UI.
+      if [[ -o interactive && -t 0 && -t 1 && ''${SHLVL:-1} -eq 1 && -z "''${HERDR_ENV:-}" ]]; then
+        command herdr
+      fi
     '';
   };
 }
