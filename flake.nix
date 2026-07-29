@@ -85,6 +85,7 @@
                 unstable = droidUnstable;
                 guiPkgs = droidUnstable;
                 isNixOnDroid = true;
+                isWsl = false;
                 inherit herdr;
               };
             }
@@ -131,6 +132,7 @@
                   unstable = nixosUnstable;
                   guiPkgs = nixosUnstable;
                   isNixOnDroid = false;
+                  isWsl = false;
                   inherit herdr;
                 };
               };
@@ -158,6 +160,7 @@
                   unstable = nixosUnstable;
                   guiPkgs = nixosUnstable;
                   isNixOnDroid = false;
+                  isWsl = true;
                   inherit herdr;
                 };
               };
@@ -191,6 +194,7 @@
                 inherit herdr;
                 guiPkgs = unstable;
                 isNixOnDroid = false;
+                isWsl = false;
               };
             };
 

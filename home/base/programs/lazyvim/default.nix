@@ -1,13 +1,39 @@
 # LazyVim設定
-{ pkgs, ... }:
+{
+  lib,
+  pkgs,
+  isWsl ? false,
+  ...
+}:
 {
   programs.neovim = {
     enable = true;
     defaultEditor = true;
     withRuby = true;
     withPython3 = true;
-    extraPackages = with pkgs; [ git ];
+    extraPackages =
+      with pkgs;
+      [ git ]
+      ++ lib.optionals isWsl [
+        marksman
+        nodejs
+      ];
     initLua = ''
+      ${lib.optionalString isWsl ''
+        vim.g.clipboard = {
+          name = "WslClipboard",
+          copy = {
+            ["+"] = { "powershell.exe", "-NoLogo", "-NoProfile", "-Command", "[Console]::InputEncoding = [System.Text.UTF8Encoding]::new(); Set-Clipboard -Value ([Console]::In.ReadToEnd())" },
+            ["*"] = { "powershell.exe", "-NoLogo", "-NoProfile", "-Command", "[Console]::InputEncoding = [System.Text.UTF8Encoding]::new(); Set-Clipboard -Value ([Console]::In.ReadToEnd())" },
+          },
+          paste = {
+            ["+"] = { "powershell.exe", "-NoLogo", "-NoProfile", "-Command", "[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new(); [Console]::Out.Write((Get-Clipboard -Raw).ToString().Replace(\"`r\", \"\"))" },
+            ["*"] = { "powershell.exe", "-NoLogo", "-NoProfile", "-Command", "[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new(); [Console]::Out.Write((Get-Clipboard -Raw).ToString().Replace(\"`r\", \"\"))" },
+          },
+          cache_enabled = 0,
+        }
+      ''}
+
       -- Bootstrap lazy.nvim
       local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
       if not vim.loop.fs_stat(lazypath) then
@@ -45,6 +71,26 @@
           { import = "lazyvim.plugins.extras.lang.sql" },
           { import = "lazyvim.plugins.extras.ai.copilot" },
           { import = "lazyvim.plugins.extras.ai.copilot-chat" },
+          ${lib.optionalString isWsl ''
+            {
+              "neovim/nvim-lspconfig",
+              opts = {
+                servers = {
+                  marksman = {
+                    mason = false,
+                    cmd = { "${pkgs.marksman}/bin/marksman", "server" },
+                  },
+                },
+              },
+            },
+            {
+              "iamcco/markdown-preview.nvim",
+              build = "rm -f app/bin/markdown-preview-linux && cd app && npm install",
+              init = function()
+                vim.g.mkdp_browser = "wsl-open"
+              end,
+            },
+          ''}
           {
             "zbirenbaum/copilot.lua",
             opts = {
