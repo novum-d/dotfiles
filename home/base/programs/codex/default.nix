@@ -1,6 +1,7 @@
 {
   config,
   isNixOnDroid ? false,
+  lib,
   pkgs,
   unstable,
   ...
@@ -74,6 +75,8 @@ let
 
   codexWithFallback = pkgs.writeShellApplication {
     name = "codex";
+    # Home Manager uses the package version to select config.toml instead of legacy config.yaml.
+    passthru.version = unstable.codex.version;
     runtimeInputs = [ pkgs.jq ];
     text = ''
       preferred_model="${primaryModel}"
@@ -145,6 +148,11 @@ in
           trust_level = "trusted";
         };
         "${config.home.homeDirectory}/repos/dotfiles" = {
+          trust_level = "trusted";
+        };
+      }
+      // lib.optionalAttrs isNixOnDroid {
+        "/storage/emulated/0/Sync/obsidian" = {
           trust_level = "trusted";
         };
       };
