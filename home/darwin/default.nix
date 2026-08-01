@@ -90,6 +90,7 @@ in
       "obsidian"
       "zed"
       "codex-app"
+      "discord"
     ];
   };
   launchd.user.agents = {
