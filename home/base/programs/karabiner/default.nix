@@ -35,10 +35,16 @@ _: {
             };
             rules = [
               {
-                description = "Right Shift alone switches input source";
+                description = "Right Shift alone switches input source with debounce";
                 manipulators = [
                   {
                     type = "basic";
+                    conditions = [
+                      {
+                        type = "expression_unless";
+                        expression = "right_shift_ime_switch_block_until > system.now.milliseconds";
+                      }
+                    ];
                     from = {
                       key_code = "right_shift";
                       modifiers.optional = [ "any" ];
@@ -53,6 +59,12 @@ _: {
                       {
                         key_code = "spacebar";
                         modifiers = [ "left_control" ];
+                      }
+                      {
+                        set_variable = {
+                          name = "right_shift_ime_switch_block_until";
+                          expression = "system.now.milliseconds + 300";
+                        };
                       }
                     ];
                   }

@@ -139,6 +139,10 @@ Android Studio を起動する。
 android-studio
 ```
 
+起動コマンドは端末から切り離されるため、Android Studio の起動後も同じシェルをそのまま操作できる。
+
+IME は右 Shift の単独押しで英数入力とMozcを切り替える。右 Shift をほかのキーと組み合わせた場合は、通常のShift修飾キーとして動作する。
+
 Device Manager または Run target に実機が表示されれば完了。
 
 ## Android Studio のバージョン更新時

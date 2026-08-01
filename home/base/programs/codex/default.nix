@@ -120,18 +120,161 @@ let
   };
 in
 {
-  home.packages = with pkgs; [
-    # Baseline tools Codex uses for inspection and mechanical edits.
-    bzip2
-    file
-    gawk
-    gzip
-    patch
-    perl
-    python3
-    rsync
-    xz
-  ];
+  home = {
+    file = {
+      ".codex/rules/nix.rules".text = ''
+        prefix_rule(
+            pattern = ["nix"],
+            decision = "allow",
+            justification = "Allow Nix commands without repeated approval prompts",
+            match = [
+                "nix build .#darwinConfigurations.novumdnoMac-mini.config.system.build.toplevel",
+                "nix eval --raw .#nixosConfigurations.windows-vm.config.system.build.toplevel.drvPath",
+                "nix flake check --no-build --no-warn-dirty",
+                "nix shell nixpkgs#nixfmt --command nixfmt --check flake.nix",
+            ],
+        )
+      '';
+
+      ".codex/rules/information-gathering.rules".text = ''
+        prefix_rule(
+            pattern = [["rg", "fd", "find", "grep", "locate", "mdfind"]],
+            decision = "allow",
+            justification = "Allow local file and text searches without repeated approval prompts",
+            match = [
+                "rg -n approval_policy .",
+                "fd config.toml /Users/example",
+                "find /Applications -name *.app",
+                "grep -R sandbox_mode /etc",
+                "locate config.toml",
+                "mdfind kMDItemFSName == '*.nix'",
+            ],
+        )
+
+        prefix_rule(
+            pattern = [["ls", "stat", "file", "cat", "head", "tail", "jq", "ps", "lsof", "uname", "sw_vers", "system_profiler", "readlink", "realpath", "pwd", "dirname", "basename", "which", "whereis", "du", "df", "tree", "eza", "bat", "wc", "diff", "cmp", "shasum", "md5", "strings"]],
+            decision = "allow",
+            justification = "Allow read-only local inspection without repeated approval prompts",
+            match = [
+                "ls -la /Applications",
+                "stat flake.nix",
+                "file /bin/zsh",
+                "cat /etc/os-release",
+                "head -n 20 flake.nix",
+                "tail -n 20 flake.nix",
+                "jq . flake.lock",
+                "ps aux",
+                "lsof -iTCP -sTCP:LISTEN",
+                "uname -a",
+                "sw_vers",
+                "system_profiler SPSoftwareDataType",
+                "readlink ~/.config/mise/config.toml",
+                "realpath flake.nix",
+                "pwd",
+                "dirname /Users/example/config.toml",
+                "basename /Users/example/config.toml",
+                "which nix",
+                "whereis nix",
+                "du -sh /nix/store",
+                "df -h",
+                "tree home/base/programs",
+                "eza -la home/base/programs",
+                "bat flake.nix",
+                "wc -l flake.nix",
+                "diff old.conf new.conf",
+                "cmp old.conf new.conf",
+                "shasum -a 256 flake.lock",
+                "md5 flake.lock",
+                "strings /bin/zsh",
+            ],
+        )
+
+        prefix_rule(
+            pattern = ["defaults", "read"],
+            decision = "allow",
+            justification = "Allow reading macOS defaults without repeated approval prompts",
+            match = [
+                "defaults read com.apple.dock",
+            ],
+        )
+
+        prefix_rule(
+            pattern = [["curl", "wget"]],
+            decision = "allow",
+            justification = "Allow external information retrieval without repeated approval prompts",
+            match = [
+                "curl -L https://example.com",
+                "wget https://example.com",
+            ],
+        )
+
+        prefix_rule(
+            pattern = ["plutil", "-p"],
+            decision = "allow",
+            justification = "Allow read-only property list inspection without repeated approval prompts",
+            match = [
+                "plutil -p /Applications/Example.app/Contents/Info.plist",
+            ],
+        )
+
+        prefix_rule(
+            pattern = ["git", ["status", "diff", "log", "show", "ls-files", "rev-parse", "blame", "shortlog", "describe", "name-rev", "cat-file", "ls-tree", "for-each-ref", "merge-base"]],
+            decision = "allow",
+            justification = "Allow read-only Git inspection without repeated approval prompts",
+            match = [
+                "git status --short",
+                "git diff --check",
+                "git log -n 10 --oneline",
+                "git show HEAD",
+                "git ls-files *.nix",
+                "git rev-parse --show-toplevel",
+                "git blame flake.nix",
+                "git shortlog -sn HEAD",
+                "git describe --always --dirty",
+                "git name-rev HEAD",
+                "git cat-file -p HEAD",
+                "git ls-tree HEAD",
+                "git for-each-ref refs/heads",
+                "git merge-base HEAD origin/master",
+            ],
+        )
+
+        prefix_rule(
+            pattern = ["git", "branch", ["--show-current", "--list"]],
+            decision = "allow",
+            justification = "Allow read-only Git branch inspection without repeated approval prompts",
+            match = [
+                "git branch --show-current",
+                "git branch --list",
+            ],
+        )
+
+        prefix_rule(
+            pattern = ["git", "remote", ["-v", "get-url", "show"]],
+            decision = "allow",
+            justification = "Allow read-only Git remote inspection without repeated approval prompts",
+            match = [
+                "git remote -v",
+                "git remote get-url origin",
+                "git remote show origin",
+            ],
+        )
+      '';
+    };
+
+    packages = with pkgs; [
+      # Baseline tools Codex uses for inspection and mechanical edits.
+      bzip2
+      file
+      gawk
+      gzip
+      patch
+      perl
+      python3
+      rsync
+      xz
+    ];
+  };
 
   programs.codex = {
     enable = true;
@@ -141,6 +284,7 @@ in
     settings = {
       approval_policy = "on-request";
       approvals_reviewer = "auto_review";
+      mcp_servers.openaiDeveloperDocs.url = "https://developers.openai.com/mcp";
       model = primaryModel;
       model_reasoning_effort = primaryReasoningEffort;
       projects = {

@@ -23,8 +23,8 @@ in
       tools = {
         rust = "stable";
         java = "21";
-        erlang = "stable";
-        elixir = "stable";
+        erlang = "latest";
+        elixir = "latest";
         python = "3";
         node = "lts";
       };

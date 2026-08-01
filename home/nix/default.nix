@@ -22,9 +22,16 @@ let
     export _JAVA_OPTIONS="-Drecreate.x11.input.method=true ''${_JAVA_OPTIONS-}"
     export STUDIO_VM_OPTIONS="''${XDG_CONFIG_HOME:-$HOME/.config}/Google/AndroidStudio2026.1.1/studio64.vmoptions"
 
+    if [ -z "''${_DOTFILES_STUDIO_DETACHED-}" ]; then
+      export _DOTFILES_STUDIO_DETACHED=1
+      exec ${pkgs.util-linux}/bin/setsid --fork "$0" "$@" </dev/null >/dev/null 2>&1
+    fi
+
     if [ -z "''${DBUS_SESSION_BUS_ADDRESS-}" ] && command -v dbus-run-session >/dev/null 2>&1; then
       exec dbus-run-session -- "$0" "$@"
     fi
+
+    unset _DOTFILES_STUDIO_DETACHED
 
     if command -v dbus-update-activation-environment >/dev/null 2>&1; then
       dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XAUTHORITY XMODIFIERS GTK_IM_MODULE QT_IM_MODULE QT_IM_MODULES SDL_IM_MODULE >/dev/null 2>&1 || true
