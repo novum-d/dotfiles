@@ -36,7 +36,7 @@ in
   system.defaults = {
     NSGlobalDomain = {
       InitialKeyRepeat = 10;
-      KeyRepeat = 1;
+      KeyRepeat = 2;
 
       ApplePressAndHoldEnabled = false;
       AppleShowAllExtensions = true;
