@@ -136,6 +136,20 @@ in
         )
       '';
 
+      ".codex/rules/git.rules".text = ''
+        prefix_rule(
+            pattern = ["git"],
+            decision = "allow",
+            justification = "Allow Git operations without repeated approval prompts",
+            match = [
+                "git status --short",
+                "git add -- flake.nix",
+                "git commit -m 'Update configuration'",
+                "git push origin master",
+            ],
+        )
+      '';
+
       ".codex/rules/information-gathering.rules".text = ''
         prefix_rule(
             pattern = [["rg", "fd", "find", "grep", "locate", "mdfind"]],
@@ -217,48 +231,6 @@ in
             ],
         )
 
-        prefix_rule(
-            pattern = ["git", ["status", "diff", "log", "show", "ls-files", "rev-parse", "blame", "shortlog", "describe", "name-rev", "cat-file", "ls-tree", "for-each-ref", "merge-base"]],
-            decision = "allow",
-            justification = "Allow read-only Git inspection without repeated approval prompts",
-            match = [
-                "git status --short",
-                "git diff --check",
-                "git log -n 10 --oneline",
-                "git show HEAD",
-                "git ls-files *.nix",
-                "git rev-parse --show-toplevel",
-                "git blame flake.nix",
-                "git shortlog -sn HEAD",
-                "git describe --always --dirty",
-                "git name-rev HEAD",
-                "git cat-file -p HEAD",
-                "git ls-tree HEAD",
-                "git for-each-ref refs/heads",
-                "git merge-base HEAD origin/master",
-            ],
-        )
-
-        prefix_rule(
-            pattern = ["git", "branch", ["--show-current", "--list"]],
-            decision = "allow",
-            justification = "Allow read-only Git branch inspection without repeated approval prompts",
-            match = [
-                "git branch --show-current",
-                "git branch --list",
-            ],
-        )
-
-        prefix_rule(
-            pattern = ["git", "remote", ["-v", "get-url", "show"]],
-            decision = "allow",
-            justification = "Allow read-only Git remote inspection without repeated approval prompts",
-            match = [
-                "git remote -v",
-                "git remote get-url origin",
-                "git remote show origin",
-            ],
-        )
       '';
     };
 
@@ -301,6 +273,10 @@ in
         };
       };
       sandbox_mode = "workspace-write";
+      sandbox_workspace_write = {
+        network_access = true;
+        writable_roots = [ config.home.homeDirectory ];
+      };
     };
   };
 }
