@@ -70,6 +70,11 @@ in
     remapCapsLockToControl = true;
   };
 
+  home-manager.users."${username}".home.file."repos/obsidian/.stignore" = {
+    force = true;
+    source = ../base/programs/syncthing/obsidian.stignore;
+  };
+
   homebrew = {
     enable = true;
     onActivation.cleanup = "zap";

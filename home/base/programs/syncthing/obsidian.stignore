@@ -1,0 +1,28 @@
+// Syncthing internals and repository metadata
+(?d).git
+(?d).stversions
+(?d)(?i).DS_Store
+
+// Generated dependency and cache directories
+(?d).venv
+(?d)node_modules
+(?d)__pycache__
+(?d).pytest_cache
+(?d).mypy_cache
+(?d).ruff_cache
+(?d)uv-cache
+
+// Images and Anki packages
+(?d)(?i)*.{png,jpg,jpeg,gif,webp,avif,heic,bmp,tif,tiff,ico}
+(?d)(?i)*.{apkg,colpkg}
+
+// Documents, archives, audio, and video
+(?d)(?i)*.{pdf,epub,mobi,doc,docx,xls,xlsx,ppt,pptx}
+(?d)(?i)*.{zip,7z,rar,tar,gz,bz2,xz,zst}
+(?d)(?i)*.{mp3,m4a,aac,wav,flac,ogg,opus,mp4,mov,mkv,webm}
+
+// Compiled code, binary data, and fonts
+(?d)(?i)*.{pyc,pyo,so,dylib,dll,exe,bin,class,jar,wasm}
+(?d)(?i)*.{db,sqlite,sqlite3,rkyv,msgpack,parquet,arrow,npy,npz,pickle,pkl}
+(?d)(?i)*.{ttf,otf,woff,woff2,pfb}
+(?d)(?i)*.{dmg,pkg,deb,rpm,apk,ipa}

@@ -104,6 +104,11 @@ in
   };
 
   xdg.enable = true;
+  home.file."repos/obsidian/.stignore" = {
+    force = true;
+    source = ../base/programs/syncthing/obsidian.stignore;
+  };
+
   xdg.desktopEntries."android-studio" = {
     name = "Android Studio";
     genericName = "Android IDE";
