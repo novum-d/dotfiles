@@ -15,12 +15,15 @@ let
         export QT_IM_MODULES="wayland;fcitx;ibus"
         export XMODIFIERS=@im=fcitx
         export SDL_IM_MODULE=fcitx
-        export _JAVA_OPTIONS="-Drecreate.x11.input.method=true ''${_JAVA_OPTIONS-}"
         export STUDIO_VM_OPTIONS="''${XDG_CONFIG_HOME:-$HOME/.config}/Google/AndroidStudio2026.1.1/studio64.vmoptions"
 
         if [ -z "''${_DOTFILES_STUDIO_DETACHED-}" ]; then
           export _DOTFILES_STUDIO_DETACHED=1
           exec ${pkgs.util-linux}/bin/setsid --fork "$0" "$@" </dev/null >/dev/null 2>&1
+        fi
+
+        if [ -z "''${DISPLAY-}" ] && [ -S /tmp/.X11-unix/X0 ]; then
+          export DISPLAY=:0
         fi
 
         if [ -z "''${DBUS_SESSION_BUS_ADDRESS-}" ] && command -v dbus-run-session >/dev/null 2>&1; then
@@ -71,6 +74,17 @@ let
 
     exec powershell.exe -NoProfile -Command "& { param([string]\$target) Start-Process \$target }" "$target"
   '';
+  windowsPowerShell = pkgs.writeShellScriptBin "powershell.exe" ''
+    set -eu
+
+    powershell_path=/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe
+    if [ ! -x "$powershell_path" ]; then
+      echo "powershell.exe: Windows PowerShell not found at $powershell_path" >&2
+      exit 127
+    fi
+
+    exec "$powershell_path" "$@"
+  '';
 in
 {
   imports = [ ../nix/configuration.nix ];
@@ -116,6 +130,7 @@ in
       fcitx5WithMozc
       android-tools
       androidStudioWsl
+      windowsPowerShell
       wslOpen
     ];
     variables.BROWSER = "wsl-open";

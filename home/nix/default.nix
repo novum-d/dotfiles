@@ -1,9 +1,11 @@
 # 共通のHome Managerの設定ファイル
 {
   config,
+  lib,
   pkgs,
   unstable,
   guiPkgs,
+  isWsl,
   ...
 }:
 
@@ -19,13 +21,18 @@ let
     export QT_IM_MODULES="wayland;fcitx;ibus"
     export XMODIFIERS=@im=fcitx
     export SDL_IM_MODULE=fcitx
-    export _JAVA_OPTIONS="-Drecreate.x11.input.method=true ''${_JAVA_OPTIONS-}"
     export STUDIO_VM_OPTIONS="''${XDG_CONFIG_HOME:-$HOME/.config}/Google/AndroidStudio2026.1.1/studio64.vmoptions"
 
     if [ -z "''${_DOTFILES_STUDIO_DETACHED-}" ]; then
       export _DOTFILES_STUDIO_DETACHED=1
       exec ${pkgs.util-linux}/bin/setsid --fork "$0" "$@" </dev/null >/dev/null 2>&1
     fi
+
+    ${lib.optionalString isWsl ''
+      if [ -z "''${DISPLAY-}" ] && [ -S /tmp/.X11-unix/X0 ]; then
+        export DISPLAY=:0
+      fi
+    ''}
 
     if [ -z "''${DBUS_SESSION_BUS_ADDRESS-}" ] && command -v dbus-run-session >/dev/null 2>&1; then
       exec dbus-run-session -- "$0" "$@"
@@ -98,6 +105,7 @@ in
           -Dawt.toolkit.name=XToolkit
           -Dsun.awt.enableInputMethods=true
           -Djava.awt.im.style=on-the-spot
+          -Drecreate.x11.input.method=true
         '';
       };
     };

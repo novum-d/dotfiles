@@ -136,7 +136,7 @@ List of devices attached
 Android Studio を起動する。
 
 ```shell
-android-studio
+studio .
 ```
 
 起動コマンドは端末から切り離されるため、Android Studio の起動後も同じシェルをそのまま操作できる。
@@ -171,6 +171,16 @@ sudo nixos-rebuild switch --flake .#windows-vm
 ```
 
 ## トラブルシュート
+
+### `studio .` が `Unable to detect graphics environment` で失敗する
+
+Herdr などの常駐プロセスから起動したシェルに `DISPLAY` が引き継がれていない可能性がある。WSLg の X11 ソケットを確認する。
+
+```shell
+test -S /tmp/.X11-unix/X0
+```
+
+この構成の `studio` ランチャーは、ソケットが存在して `DISPLAY` が未設定の場合に `DISPLAY=:0` を補完する。
 
 ### `adb` が `Could not start dynamically linked executable` で失敗する
 
