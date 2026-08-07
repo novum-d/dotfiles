@@ -35,14 +35,18 @@ _: {
             };
             rules = [
               {
-                description = "Right Shift alone switches input source with debounce";
+                description = "Right Shift alone switches directly between English and Japanese";
                 manipulators = [
                   {
                     type = "basic";
                     conditions = [
                       {
-                        type = "expression_unless";
-                        expression = "right_shift_ime_switch_block_until > system.now.milliseconds";
+                        type = "input_source_if";
+                        input_sources = [
+                          {
+                            language = "^ja$";
+                          }
+                        ];
                       }
                     ];
                     from = {
@@ -57,14 +61,35 @@ _: {
                     ];
                     to_if_alone = [
                       {
-                        key_code = "spacebar";
-                        modifiers = [ "left_control" ];
+                        key_code = "japanese_eisuu";
                       }
+                    ];
+                  }
+                  {
+                    type = "basic";
+                    conditions = [
                       {
-                        set_variable = {
-                          name = "right_shift_ime_switch_block_until";
-                          expression = "system.now.milliseconds + 300";
-                        };
+                        type = "input_source_if";
+                        input_sources = [
+                          {
+                            language = "^en$";
+                          }
+                        ];
+                      }
+                    ];
+                    from = {
+                      key_code = "right_shift";
+                      modifiers.optional = [ "any" ];
+                    };
+                    to = [
+                      {
+                        key_code = "right_shift";
+                        lazy = true;
+                      }
+                    ];
+                    to_if_alone = [
+                      {
+                        key_code = "japanese_kana";
                       }
                     ];
                   }

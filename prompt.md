@@ -25,7 +25,9 @@ Home Managerの共通設定は `home/base` に集約し、OSや端末に固有�
 
 ユーザーの既存差分は所有物として扱い、関係のない整形、移動、削除、コミットへの混入を行いません。
 
-Nixコマンド、Git操作、外部情報の取得、PC内のファイル・テキスト検索、読み取り専用の状態確認は、Codex rulesで無確認実行を許可します。この許可は承認ダイアログを省略するものであり、コミットやpushはユーザーが明示的に依頼した場合だけ行います。`curl`や`wget`によるデータ送信・更新・削除、システム適用など、依頼範囲外の副作用を伴う操作へは拡張しません。
+Nixコマンド、GitとGitHub CLIの操作、外部情報の取得、PC内のファイル・テキスト検索、読み取り専用の状態確認に加え、Node.jsやPythonなどのランタイムを使う確認・解析と、依頼された作業のビルド・検証に必要な依存関係の導入は、Codex rulesで無確認実行を許可します。この許可は承認ダイアログを省略するものであり、コミット、push、GitHub上の書き込み操作はユーザーが明示的に依頼した場合だけ行います。依存関係の導入は作業に必要な範囲に限り、パッケージの公開・削除、依頼外のグローバル変更、`curl`や`wget`によるデータ送信・更新・削除、システム適用などの副作用へは拡張しません。
+
+評価、ビルド、テスト、lint、format、dry-run、構文確認など、変更の正しさを確認するための検証コマンドは常時許可済みとして扱い、ユーザーへの個別確認なしで実行します。
 
 Codexの既定sandboxは `workspace-write` を維持し、Home Managerのhome directory全体を書き込み可能rootとして追加し、sandbox内のnetwork accessを有効にします。OS全体を無制限に変更できる `danger-full-access` は既定にしません。
 
@@ -84,7 +86,7 @@ Codexの既定sandboxは `workspace-write` を維持し、Home Managerのhome di
 
 ### CodexとHerdr
 
-- CodexとHerdrロールの既定モデルは `gpt-5.6-sol`、reasoning effortは `high` とする。
+- CodexとHerdrロールの既定モデルは `config/default.nix` の `codexModels` を正本とし、`gpt-5.6-luna`、reasoning effortは `high` とする。
 - 利用可能モデル一覧に既定モデルがない場合だけ `gpt-5.5`、`high` へフォールバックする。
 - モデル一覧を取得できない場合は、ネットワーク障害などをモデル未提供と誤認せず、既定モデルで起動を試みる。
 - モデルとreasoning effortはランチャー側で選択し、ユーザーから明示的に確認を求められない限り、Herdrロールの開始報告では言及・比較しない。確認を求められた場合は、ランチャーが設定する `CODEX_CONFIGURED_MODEL` と `CODEX_CONFIGURED_REASONING_EFFORT`、または現在のスレッドの `model` と `reasoning_effort` メタデータを使用する。ベース指示の「GPT-5ベース」のようなモデルファミリー表記だけで設定不一致と判断しない。

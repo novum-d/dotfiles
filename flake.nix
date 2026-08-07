@@ -70,7 +70,7 @@
       };
 
       localConfig = import ./config;
-      inherit (localConfig) username;
+      inherit (localConfig) codexModels username;
     in
     {
       nixOnDroidConfigurations = rec {
@@ -86,7 +86,7 @@
                 guiPkgs = droidUnstable;
                 isNixOnDroid = true;
                 isWsl = false;
-                inherit herdr;
+                inherit codexModels herdr;
               };
             }
           ];
@@ -133,7 +133,7 @@
                   guiPkgs = nixosUnstable;
                   isNixOnDroid = false;
                   isWsl = false;
-                  inherit herdr;
+                  inherit codexModels herdr;
                 };
               };
             }
@@ -161,7 +161,7 @@
                   guiPkgs = nixosUnstable;
                   isNixOnDroid = false;
                   isWsl = true;
-                  inherit herdr;
+                  inherit codexModels herdr;
                 };
               };
             }
@@ -191,7 +191,7 @@
 
               extraSpecialArgs = {
                 inherit unstable;
-                inherit herdr;
+                inherit codexModels herdr;
                 guiPkgs = unstable;
                 isNixOnDroid = false;
                 isWsl = false;

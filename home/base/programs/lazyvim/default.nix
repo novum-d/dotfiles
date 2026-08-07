@@ -34,6 +34,39 @@
         }
       ''}
 
+      local codex_panel_command = { "codex" }
+
+      local function codex_panel_opts()
+        return {
+          cwd = vim.fn.getcwd(),
+          win = {
+            position = "right",
+            width = 0.35,
+            wo = {
+              winfixwidth = true,
+            },
+          },
+        }
+      end
+
+      local function toggle_codex_panel()
+        if not _G.Snacks then
+          require("lazy").load({ plugins = { "snacks.nvim" } })
+        end
+        local terminal, created = Snacks.terminal.get(codex_panel_command, codex_panel_opts())
+        if not created then
+          terminal:toggle()
+        end
+        vim.g.CodexPanelOpen = terminal:win_valid() and 1 or 0
+      end
+
+      vim.api.nvim_create_user_command("Codex", toggle_codex_panel, {
+        desc = "Toggle Codex right panel",
+      })
+      vim.api.nvim_create_user_command("CodexToggle", toggle_codex_panel, {
+        desc = "Toggle Codex right panel",
+      })
+
       -- Bootstrap lazy.nvim
       local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
       if not vim.loop.fs_stat(lazypath) then
@@ -66,6 +99,7 @@
           { import = "lazyvim.plugins.extras.lang.typescript" },
           { import = "lazyvim.plugins.extras.linting.eslint" },
           { import = "lazyvim.plugins.extras.lang.toml" },
+          { import = "lazyvim.plugins.extras.lang.terraform" },
           { import = "lazyvim.plugins.extras.lang.rust" },
           { import = "lazyvim.plugins.extras.lang.nix" },
           { import = "lazyvim.plugins.extras.lang.sql" },
@@ -103,11 +137,53 @@
               model = "gpt-5.5",
             },
           },
-          { import = "plugins" },
+          {
+            "folke/snacks.nvim",
+            keys = {
+              {
+                "<leader>CC",
+                toggle_codex_panel,
+                desc = "Toggle Codex right panel",
+                mode = { "n", "t" },
+              },
+            },
+          },
+          {
+            "folke/persistence.nvim",
+            event = "VimEnter",
+            opts = {},
+            init = function()
+              -- Terminal jobs are restarted explicitly after restoring the layout.
+              vim.opt.sessionoptions:remove("terminal")
+            end,
+            config = function(_, opts)
+              local persistence = require("persistence")
+              persistence.setup(opts)
+
+              vim.api.nvim_create_autocmd("User", {
+                pattern = "PersistenceLoadPost",
+                callback = function()
+                  if vim.g.CodexPanelOpen == 1 then
+                    vim.g.CodexPanelOpen = 0
+                    vim.schedule(toggle_codex_panel)
+                  end
+                end,
+              })
+
+              if vim.fn.argc(-1) == 0 then
+                vim.schedule(function()
+                  persistence.load()
+                end)
+              end
+            end,
+          },
         },
         defaults = {
           lazy = true,
           version = false,
+        },
+        rocks = {
+          enabled = false,
         },
         install = {
           colorscheme = { "gruvbox", "tokyonight", "habamax" },
