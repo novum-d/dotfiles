@@ -86,7 +86,7 @@ Codexの既定sandboxは `workspace-write` を維持し、Home Managerのhome di
 
 ### CodexとHerdr
 
-- CodexとHerdrロールの既定モデルは `config/default.nix` の `codexModels` を正本とし、`gpt-5.6-luna`、reasoning effortは `high` とする。
+- CodexとHerdrロールの既定モデルは `config/default.nix` の `codexModels` を正本とし、`gpt-5.6-sol`、reasoning effortは `high` とする。
 - 利用可能モデル一覧に既定モデルがない場合だけ `gpt-5.5`、`high` へフォールバックする。
 - モデル一覧を取得できない場合は、ネットワーク障害などをモデル未提供と誤認せず、既定モデルで起動を試みる。
 - モデルとreasoning effortはランチャー側で選択し、ユーザーから明示的に確認を求められない限り、Herdrロールの開始報告では言及・比較しない。確認を求められた場合は、ランチャーが設定する `CODEX_CONFIGURED_MODEL` と `CODEX_CONFIGURED_REASONING_EFFORT`、または現在のスレッドの `model` と `reasoning_effort` メタデータを使用する。ベース指示の「GPT-5ベース」のようなモデルファミリー表記だけで設定不一致と判断しない。

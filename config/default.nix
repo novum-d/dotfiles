@@ -1,7 +1,7 @@
 {
   codexModels = {
     preferred = {
-      model = "gpt-5.6-luna";
+      model = "gpt-5.6-sol";
       reasoningEffort = "high";
     };
     fallback = {
