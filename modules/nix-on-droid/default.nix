@@ -1,3 +1,4 @@
+# Nix-on-Droid共通のシステム・Home Manager設定
 {
   lib,
   pkgs,

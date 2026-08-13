@@ -40,6 +40,16 @@ nix shell github:NixOS/nixpkgs/nixpkgs-unstable#git \
   --command git pull
 ```
 
+## 共通の初期チェック
+
+clone後、設定を反映する前に全環境共通のpreflightを実行します。
+
+```shell
+./boot-strap.sh
+```
+
+GitまたはNixがまだ使えない初期状態では、上記の一時的な `nix shell` を先に使います。
+
 ## 設定を反映する
 
 リポジトリ直下で実行する。

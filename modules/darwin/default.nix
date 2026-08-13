@@ -1,4 +1,4 @@
-# macOS共通設定
+# macOS固有のnix-darwin設定
 { pkgs, username, ... }:
 
 let
@@ -23,12 +23,19 @@ let
       --max-delete 100 \
       --log-level INFO
   '';
+  mkKeepAliveAgent = programArguments: {
+    serviceConfig = {
+      ProgramArguments = programArguments;
+      RunAtLoad = true;
+      KeepAlive = true;
+    };
+  };
 in
 {
-  # nix-darwinとの競合を避けるため、nixは無効化
+  # Determinate Nixがdaemonを管理するため、nix-darwin側では管理しない。
   nix.enable = false;
 
-  # unfree（オープンソースでない、またはライセンス場制限のある）なパッケージを許可
+  # Homebrew caskと同様に、非自由ライセンスのGUIアプリを許可する。
   nixpkgs.config.allowUnfree = true;
 
   environment.shells = [ pkgs.zsh ];
@@ -41,7 +48,6 @@ in
       ApplePressAndHoldEnabled = false;
       AppleShowAllExtensions = true;
       AppleShowAllFiles = true;
-
     };
 
     finder = {
@@ -72,6 +78,7 @@ in
 
   homebrew = {
     enable = true;
+    # 宣言から外したformula/caskも次回activationで削除する。
     onActivation.cleanup = "zap";
     brews = [
       "mas"
@@ -79,45 +86,32 @@ in
       "syncthing"
     ];
     casks = [
-      "font-hack-nerd-font"
-      "ghostty"
       "anki"
-      "google-chrome"
-      "karabiner-elements"
-      "slack"
-      "jetbrains-toolbox"
       "clipy"
-      "obsidian"
-      "zed"
       "codex-app"
       "discord"
+      "font-hack-nerd-font"
+      "ghostty"
+      "google-chrome"
+      "karabiner-elements"
+      "jetbrains-toolbox"
+      "obsidian"
+      "slack"
+      "zed"
     ];
   };
+
   launchd.user.agents = {
-    syncthing = {
-      serviceConfig = {
-        ProgramArguments = [
-          "/opt/homebrew/bin/syncthing"
-          "serve"
-          "--no-browser"
-        ];
+    syncthing = mkKeepAliveAgent [
+      "/opt/homebrew/bin/syncthing"
+      "serve"
+      "--no-browser"
+    ];
 
-        RunAtLoad = true;
-        KeepAlive = true;
-      };
-    };
-
-    ollama = {
-      serviceConfig = {
-        ProgramArguments = [
-          "/opt/homebrew/bin/ollama"
-          "serve"
-        ];
-
-        RunAtLoad = true;
-        KeepAlive = true;
-      };
-    };
+    ollama = mkKeepAliveAgent [
+      "/opt/homebrew/bin/ollama"
+      "serve"
+    ];
 
     obsidian-gtd-google-drive-sync = {
       serviceConfig = {

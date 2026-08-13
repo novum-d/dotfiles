@@ -2,7 +2,27 @@
 
 このdotfilesを新しいMacへ導入し、nix-darwinとHome Managerの設定を適用する手順です。現在の構成はApple Siliconの `novumdnoMac-mini` を対象にしています。
 
-## 1. Nixをインストールする
+## 1. リポジトリをcloneする
+
+初回はHTTPSでcloneできます。
+
+```shell
+mkdir -p ~/repos
+git clone https://github.com/novum-d/dotfiles.git ~/repos/dotfiles
+cd ~/repos/dotfiles
+```
+
+## 2. 共通の初期チェック
+
+全OS共通の入口として、他の設定を変更する前にpreflightを実行します。
+
+```shell
+./boot-strap.sh
+```
+
+このスクリプトはXcode Command Line Tools、Git、Nixを確認するだけで、nix-darwinのactivationは行いません。Nixが未導入の場合は次の手順でインストールしてから、もう一度実行してください。
+
+## 3. Nixをインストールする
 
 [Determinate Nixの公式セットアップ](https://docs.determinate.systems/getting-started/individuals/)からmacOS用インストーラーを取得して実行します。Determinate NixではFlakeが最初から有効です。
 
@@ -14,23 +34,13 @@ nix --version
 
 このリポジトリでは、Determinate Nixとnix-darwinによるNix管理の競合を避けるため、`modules/darwin/default.nix` で `nix.enable = false` を設定しています。
 
-## 2. リポジトリをcloneする
-
-初回はHTTPSでcloneできます。
-
-```shell
-mkdir -p ~/repos
-git clone https://github.com/novum-d/dotfiles.git ~/repos/dotfiles
-cd ~/repos/dotfiles
-```
-
 SSHへ切り替える場合は、[GitHub SSH設定](github-ssh.md)を完了してからリモートURLを変更します。
 
 ```shell
 git remote set-url origin git@github.com:novum-d/dotfiles.git
 ```
 
-## 3. ユーザーとホストを設定する
+## 4. ユーザーとホストを設定する
 
 ### 既存のMac構成を使用する場合
 
@@ -67,7 +77,7 @@ cp hosts/hosts.nix.sample "hosts/${HOST_NAME}/default.nix"
 
 続いて `flake.nix` の `darwinConfigurations` に、そのホスト名と `hosts/<ホスト名>` を使う構成を追加します。Intel Macでは、ホスト設定の `nixpkgs.hostPlatform` とFlakeのDarwin用 `system` を `x86_64-darwin` に変更し、Apple Silicon専用のRosetta設定も無効化してください。
 
-## 4. ローカルのGitユーザー情報を設定する
+## 5. ローカルのGitユーザー情報を設定する
 
 Gitのユーザー名とメールアドレスはNixへ直接書かず、Git管理外の `~/.gitconfig.local` に保存します。
 
@@ -77,7 +87,7 @@ cp samples/gitconfig.local.sample ~/.gitconfig.local
 
 コピー後、`~/.gitconfig.local` の `user.name` と `user.email` を編集します。詳しくは[ローカル個人情報の分離](local-secrets.md)を参照してください。
 
-## 5. 既存ファイルを確認する
+## 6. 既存ファイルを確認する
 
 Home Managerが管理するファイルと同名のファイルがすでにある場合は、初回activation時に `.backup` へ移動されます。特に `~/.zshrc` など、必要な設定が残っていることを事前に確認してください。
 
@@ -87,7 +97,7 @@ Home Managerが管理するファイルと同名のファイルがすでにあ�
 mv ~/.zshrc ~/.zshrc.pre-nix
 ```
 
-## 6. 初回のnix-darwin設定を適用する
+## 7. 初回のnix-darwin設定を適用する
 
 初回は `darwin-rebuild` がまだPATHにないため、リポジトリ直下でnix-darwinのFlakeから実行します。
 
@@ -100,7 +110,7 @@ sudo nix run github:nix-darwin/nix-darwin/nix-darwin-26.05#darwin-rebuild -- \
 
 初回適用では、Nixパッケージに加えてHomebrew、GUIアプリ、macOS defaults、launchdサービスなども構成されます。
 
-## 7. 設定を更新する
+## 8. 設定を更新する
 
 2回目以降は、リポジトリ直下で次のコマンドを実行します。
 
@@ -117,7 +127,7 @@ u
 
 `u` は `sudo darwin-rebuild switch --flake .` を実行するため、別のディレクトリから使用する場合は明示的にFlakeのパスとホスト名を指定してください。
 
-## 8. 動作を確認する
+## 9. 動作を確認する
 
 ```shell
 command -v darwin-rebuild

@@ -1,0 +1,79 @@
+prefix_rule(
+    pattern = [["rg", "fd", "find", "grep", "locate", "mdfind"]],
+    decision = "allow",
+    justification = "Allow local file and text searches without repeated approval prompts",
+    match = [
+        "rg -n approval_policy .",
+        "fd config.toml /Users/example",
+        "find /Applications -name *.app",
+        "grep -R sandbox_mode /etc",
+        "locate config.toml",
+        "mdfind kMDItemFSName == '*.nix'",
+    ],
+)
+
+prefix_rule(
+    pattern = [["ls", "stat", "file", "cat", "head", "tail", "jq", "ps", "lsof", "uname", "sw_vers", "system_profiler", "readlink", "realpath", "pwd", "dirname", "basename", "which", "whereis", "du", "df", "tree", "eza", "bat", "wc", "diff", "cmp", "shasum", "md5", "strings"]],
+    decision = "allow",
+    justification = "Allow read-only local inspection without repeated approval prompts",
+    match = [
+        "ls -la /Applications",
+        "stat flake.nix",
+        "file /bin/zsh",
+        "cat /etc/os-release",
+        "head -n 20 flake.nix",
+        "tail -n 20 flake.nix",
+        "jq . flake.lock",
+        "ps aux",
+        "lsof -iTCP -sTCP:LISTEN",
+        "uname -a",
+        "sw_vers",
+        "system_profiler SPSoftwareDataType",
+        "readlink ~/.config/mise/config.toml",
+        "realpath flake.nix",
+        "pwd",
+        "dirname /Users/example/config.toml",
+        "basename /Users/example/config.toml",
+        "which nix",
+        "whereis nix",
+        "du -sh /nix/store",
+        "df -h",
+        "tree home/base/programs",
+        "eza -la home/base/programs",
+        "bat flake.nix",
+        "wc -l flake.nix",
+        "diff old.conf new.conf",
+        "cmp old.conf new.conf",
+        "shasum -a 256 flake.lock",
+        "md5 flake.lock",
+        "strings /bin/zsh",
+    ],
+)
+
+prefix_rule(
+    pattern = ["defaults", "read"],
+    decision = "allow",
+    justification = "Allow reading macOS defaults without repeated approval prompts",
+    match = [
+        "defaults read com.apple.dock",
+    ],
+)
+
+prefix_rule(
+    pattern = [["curl", "wget"]],
+    decision = "allow",
+    justification = "Allow external information retrieval without repeated approval prompts",
+    match = [
+        "curl -L https://example.com",
+        "wget https://example.com",
+    ],
+)
+
+prefix_rule(
+    pattern = ["plutil", "-p"],
+    decision = "allow",
+    justification = "Allow read-only property list inspection without repeated approval prompts",
+    match = [
+        "plutil -p /Applications/Example.app/Contents/Info.plist",
+    ],
+)

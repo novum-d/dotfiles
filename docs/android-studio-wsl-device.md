@@ -151,16 +151,13 @@ Android Studio の設定ディレクトリ名が変わった場合は、`Android
 
 変更箇所:
 
-- `home/linux/default.nix`
-  - `STUDIO_VM_OPTIONS` のパス
-  - `home.file.".config/Google/AndroidStudio2026.1.1/studio64.vmoptions"`
-- `modules/wsl/default.nix`
-  - `androidStudioWsl` 内の `STUDIO_VM_OPTIONS` のパス
+- `lib/android-studio.nix`
+  - `vmOptionsConfigPath`
 
 確認コマンド:
 
 ```shell
-rg -n "AndroidStudio[0-9]" home/linux/default.nix modules/wsl/default.nix
+rg -n "AndroidStudio[0-9]" lib/android-studio.nix docs/android-studio-wsl-device.md
 ```
 
 変更後は WSL/NixOS 設定を評価してから反映する。

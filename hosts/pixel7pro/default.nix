@@ -1,3 +1,4 @@
+# Pixel 7 Pro固有のNix-on-Droid設定
 {
   lib,
   pkgs,

@@ -23,6 +23,8 @@ Home Managerの共通設定は `home/base` に集約し、OSや端末に固有�
 4. 関連する `docs/` とサンプル設定を確認する。
 5. 外部仕様やパッケージ状態が関係する場合は、公式ドキュメントや実際のNix評価で確認する。
 
+新しい端末へ導入する場合は、clone後に [`boot-strap.sh`](boot-strap.sh) を最初に実行する。このスクリプトは全OS共通の前提確認だけを行い、system activationは実行しない。
+
 ユーザーの既存差分は所有物として扱い、関係のない整形、移動、削除、コミットへの混入を行いません。
 
 Nixコマンド、GitとGitHub CLIの操作、外部情報の取得、PC内のファイル・テキスト検索、読み取り専用の状態確認に加え、Node.jsやPythonなどのランタイムを使う確認・解析と、依頼された作業のビルド・検証に必要な依存関係の導入は、Codex rulesで無確認実行を許可します。この許可は承認ダイアログを省略するものであり、コミット、push、GitHub上の書き込み操作はユーザーが明示的に依頼した場合だけ行います。依存関係の導入は作業に必要な範囲に限り、パッケージの公開・削除、依頼外のグローバル変更、`curl`や`wget`によるデータ送信・更新・削除、システム適用などの副作用へは拡張しません。
@@ -74,6 +76,7 @@ Codexの既定sandboxは `workspace-write` を維持し、Home Managerのhome di
 | WSL固有のinterop、USB、GUI起動 | `modules/wsl/default.nix` |
 | Nix-on-Droid固有の端末・activation設定 | `modules/nix-on-droid/default.nix` |
 | ハードウェア、ホスト名、端末固有override | `hosts/<host>` |
+| 複数moduleで共有するPure Nix関数 | `lib/<purpose>.nix` |
 | 導入・復旧・運用手順 | `docs/` |
 
 ### パッケージ追加
@@ -85,6 +88,7 @@ Codexの既定sandboxは `workspace-write` を維持し、Home Managerのhome di
 - Linuxだけで利用可能なパッケージには `lib.optionals` または `lib.meta.availableOn` を使う。
 - AI系CLIは、特別な理由がない限り `nixpkgs-unstable` の `unstable` から取得する。
 - 同じパッケージをsystem packages、Home Manager、Homebrewへ重複配置しない。
+- 同じ生成処理を複数moduleで使う場合は、OS固有optionを含まない関数だけを `lib` へ抽出する。
 
 ### CodexとHerdr
 

@@ -1,50 +1,24 @@
-{ pkgs, unstable, ... }:
+# WSL固有のNixOSシステム設定
+{
+  lib,
+  pkgs,
+  unstable,
+  ...
+}:
 
 let
   fcitx5WithMozc = pkgs.qt6Packages.fcitx5-with-addons.override {
     addons = with pkgs; [ fcitx5-mozc ];
   };
+  studioSupport = import ../../lib/android-studio.nix {
+    inherit lib pkgs;
+    androidStudio = unstable.android-studio;
+    isWsl = true;
+  };
   androidStudioWsl = pkgs.symlinkJoin {
     name = "android-studio-wsl";
     paths = [
-      (pkgs.writeShellScriptBin "android-studio" ''
-        set -u
-
-        export GTK_IM_MODULE=fcitx
-        export QT_IM_MODULE=fcitx
-        export QT_IM_MODULES="wayland;fcitx;ibus"
-        export XMODIFIERS=@im=fcitx
-        export SDL_IM_MODULE=fcitx
-        export STUDIO_VM_OPTIONS="''${XDG_CONFIG_HOME:-$HOME/.config}/Google/AndroidStudio2026.1.1/studio64.vmoptions"
-
-        if [ -z "''${_DOTFILES_STUDIO_DETACHED-}" ]; then
-          export _DOTFILES_STUDIO_DETACHED=1
-          exec ${pkgs.util-linux}/bin/setsid --fork "$0" "$@" </dev/null >/dev/null 2>&1
-        fi
-
-        if [ -z "''${DISPLAY-}" ] && [ -S /tmp/.X11-unix/X0 ]; then
-          export DISPLAY=:0
-        fi
-
-        if [ -z "''${DBUS_SESSION_BUS_ADDRESS-}" ] && command -v dbus-run-session >/dev/null 2>&1; then
-          exec dbus-run-session -- "$0" "$@"
-        fi
-
-        unset _DOTFILES_STUDIO_DETACHED
-
-        if command -v dbus-update-activation-environment >/dev/null 2>&1; then
-          dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XAUTHORITY XMODIFIERS GTK_IM_MODULE QT_IM_MODULE QT_IM_MODULES SDL_IM_MODULE >/dev/null 2>&1 || true
-        fi
-
-        if command -v fcitx5 >/dev/null 2>&1 && [ -n "''${DISPLAY-}" ]; then
-          fcitx5 --disable waylandim -d --replace >/dev/null 2>&1 || true
-          fcitx5-remote -s mozc >/dev/null 2>&1 || true
-          fcitx5-remote -o >/dev/null 2>&1 || true
-        fi
-
-        unset WAYLAND_DISPLAY
-        exec ${unstable.android-studio}/bin/android-studio "$@"
-      '')
+      (studioSupport.mkLauncher "android-studio")
       (pkgs.makeDesktopItem {
         name = "android-studio";
         desktopName = "Android Studio";

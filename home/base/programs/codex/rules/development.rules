@@ -1,0 +1,144 @@
+prefix_rule(
+    pattern = [["node", "python", "python3", "ruby", "perl"]],
+    decision = "allow",
+    justification = "Allow language runtimes used for project checks and analysis without repeated approval prompts",
+    match = [
+        "node scripts/check.mjs",
+        "python3 -m pytest",
+        "ruby scripts/check.rb",
+    ],
+)
+
+prefix_rule(
+    pattern = [["npm", "pnpm", "yarn", "bun"], ["install", "add", "ci"]],
+    decision = "allow",
+    justification = "Allow installing JavaScript dependencies required by the current task without repeated approval prompts",
+    match = [
+        "npm ci",
+        "pnpm install",
+        "yarn add typescript",
+        "bun install",
+    ],
+    not_match = [
+        "npm publish",
+        "pnpm remove typescript",
+    ],
+)
+
+prefix_rule(
+    pattern = [["npx", "pnpx", "bunx"]],
+    decision = "allow",
+    justification = "Allow task-scoped JavaScript tools used for project checks and analysis without repeated approval prompts",
+    match = [
+        "npx eslint .",
+        "pnpx prettier --check .",
+        "bunx tsc --noEmit",
+    ],
+)
+
+prefix_rule(
+    pattern = [["pip", "pip3"], "install"],
+    decision = "allow",
+    justification = "Allow installing Python dependencies required by the current task without repeated approval prompts",
+    match = [
+        "pip install pytest",
+        "pip3 install -r requirements.txt",
+    ],
+)
+
+prefix_rule(
+    pattern = [["python", "python3"], "-m", "pip", "install"],
+    decision = "allow",
+    justification = "Allow installing Python dependencies through the active interpreter without repeated approval prompts",
+    match = [
+        "python -m pip install pytest",
+        "python3 -m pip install -r requirements.txt",
+    ],
+)
+
+prefix_rule(
+    pattern = ["uv", ["add", "sync", "lock"]],
+    decision = "allow",
+    justification = "Allow resolving Python dependencies required by the current task without repeated approval prompts",
+    match = [
+        "uv add pytest",
+        "uv sync",
+        "uv lock",
+    ],
+)
+
+prefix_rule(
+    pattern = ["cargo", ["add", "fetch"]],
+    decision = "allow",
+    justification = "Allow resolving Rust dependencies required by the current task without repeated approval prompts",
+    match = [
+        "cargo add serde",
+        "cargo fetch",
+    ],
+)
+
+prefix_rule(
+    pattern = ["go", "get"],
+    decision = "allow",
+    justification = "Allow installing Go dependencies required by the current task without repeated approval prompts",
+    match = [
+        "go get golang.org/x/tools/cmd/goimports",
+    ],
+)
+
+prefix_rule(
+    pattern = ["go", "mod", ["download", "tidy"]],
+    decision = "allow",
+    justification = "Allow resolving Go module dependencies required by the current task without repeated approval prompts",
+    match = [
+        "go mod download",
+        "go mod tidy",
+    ],
+)
+
+prefix_rule(
+    pattern = [["bundle", "composer"], "install"],
+    decision = "allow",
+    justification = "Allow installing Ruby or PHP dependencies required by the current task without repeated approval prompts",
+    match = [
+        "bundle install",
+        "composer install",
+    ],
+)
+
+prefix_rule(
+    pattern = ["gem", "install"],
+    decision = "allow",
+    justification = "Allow installing Ruby dependencies required by the current task without repeated approval prompts",
+    match = [
+        "gem install bundler",
+    ],
+)
+
+prefix_rule(
+    pattern = ["composer", "require"],
+    decision = "allow",
+    justification = "Allow adding PHP dependencies required by the current task without repeated approval prompts",
+    match = [
+        "composer require phpunit/phpunit",
+    ],
+)
+
+prefix_rule(
+    pattern = ["mix", "deps.get"],
+    decision = "allow",
+    justification = "Allow resolving Elixir dependencies required by the current task without repeated approval prompts",
+    match = [
+        "mix deps.get",
+    ],
+)
+
+prefix_rule(
+    pattern = ["mise", ["install", "use"]],
+    decision = "allow",
+    justification = "Allow installing task-required development tools through mise without repeated approval prompts",
+    match = [
+        "mise install",
+        "mise use node@lts",
+    ],
+)

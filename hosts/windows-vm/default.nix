@@ -1,3 +1,4 @@
+# Windows VM固有のNixOS-WSL設定
 { username, ... }:
 
 {

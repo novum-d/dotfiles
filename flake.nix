@@ -1,5 +1,5 @@
 {
-  description = "NixOS configuration";
+  description = "Cross-platform Nix configurations for macOS, NixOS, WSL, and Nix-on-Droid";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
@@ -46,31 +46,80 @@
       ...
     }:
     let
-      system = "aarch64-darwin";
-
-      unstable = import nixpkgs-unstable {
-        inherit system;
-        config.allowUnfree = true;
+      systems = {
+        darwin = "aarch64-darwin";
+        droid = "aarch64-linux";
+        linux = "x86_64-linux";
       };
 
-      nixosUnstable = import nixpkgs-unstable {
-        system = "x86_64-linux";
-        config.allowUnfree = true;
-      };
+      mkUnstablePackages =
+        system:
+        import nixpkgs-unstable {
+          inherit system;
+          config.allowUnfree = true;
+        };
+      darwinUnstable = mkUnstablePackages systems.darwin;
+      droidUnstable = mkUnstablePackages systems.droid;
+      nixosUnstable = mkUnstablePackages systems.linux;
 
       droidPkgs = import nixpkgs-droid {
-        system = "aarch64-linux";
+        system = systems.droid;
         overlays = [ nix-on-droid.overlays.default ];
         config.allowUnfree = true;
       };
 
-      droidUnstable = import nixpkgs-unstable {
-        system = "aarch64-linux";
-        config.allowUnfree = true;
-      };
-
       localConfig = import ./config;
-      inherit (localConfig) codexModels username;
+      inherit (localConfig) codexModels syncthing username;
+
+      # 全Home Manager構成へ渡す値を一箇所に集約し、環境差だけを引数にする。
+      mkHomeManagerExtraArgs =
+        {
+          unstablePackages,
+          isNixOnDroid ? false,
+          isWsl ? false,
+        }:
+        {
+          unstable = unstablePackages;
+          guiPkgs = unstablePackages;
+          inherit
+            codexModels
+            herdr
+            isNixOnDroid
+            isWsl
+            syncthing
+            ;
+        };
+
+      nixosSpecialArgs = {
+        inherit username;
+        unstable = nixosUnstable;
+        guiPkgs = nixosUnstable;
+      };
+      mkNixosConfiguration =
+        {
+          hostModule,
+          isWsl ? false,
+          platformModules ? [ ],
+        }:
+        nixpkgs.lib.nixosSystem {
+          system = systems.linux;
+          specialArgs = nixosSpecialArgs;
+          modules = platformModules ++ [
+            hostModule
+            home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                backupFileExtension = "backup";
+                extraSpecialArgs = mkHomeManagerExtraArgs {
+                  unstablePackages = nixosUnstable;
+                  inherit isWsl;
+                };
+              };
+            }
+          ];
+        };
     in
     {
       nixOnDroidConfigurations = rec {
@@ -81,12 +130,9 @@
           modules = [
             ./hosts/pixel7pro
             {
-              home-manager.extraSpecialArgs = {
-                unstable = droidUnstable;
-                guiPkgs = droidUnstable;
+              home-manager.extraSpecialArgs = mkHomeManagerExtraArgs {
+                unstablePackages = droidUnstable;
                 isNixOnDroid = true;
-                isWsl = false;
-                inherit codexModels herdr;
               };
             }
           ];
@@ -112,68 +158,22 @@
       };
 
       nixosConfigurations = {
-        nixos = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          specialArgs = {
-            inherit username;
-            unstable = nixosUnstable;
-            guiPkgs = nixosUnstable;
-          };
-          modules = [
-            ./hosts/xps15/configuration.nix
-            home-manager.nixosModules.home-manager
-            {
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                backupFileExtension = "backup";
-
-                extraSpecialArgs = {
-                  unstable = nixosUnstable;
-                  guiPkgs = nixosUnstable;
-                  isNixOnDroid = false;
-                  isWsl = false;
-                  inherit codexModels herdr;
-                };
-              };
-            }
-          ];
+        nixos = mkNixosConfiguration {
+          hostModule = ./hosts/xps15/configuration.nix;
         };
-        windows-vm = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          specialArgs = {
-            inherit username;
-            unstable = nixosUnstable;
-            guiPkgs = nixosUnstable;
-          };
-          modules = [
-            nixos-wsl.nixosModules.default
-            ./hosts/windows-vm
-            home-manager.nixosModules.home-manager
-            {
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                backupFileExtension = "backup";
-
-                extraSpecialArgs = {
-                  unstable = nixosUnstable;
-                  guiPkgs = nixosUnstable;
-                  isNixOnDroid = false;
-                  isWsl = true;
-                  inherit codexModels herdr;
-                };
-              };
-            }
-          ];
+        windows-vm = mkNixosConfiguration {
+          hostModule = ./hosts/windows-vm;
+          isWsl = true;
+          platformModules = [ nixos-wsl.nixosModules.default ];
         };
       };
       darwinConfigurations."novumdnoMac-mini" = nix-darwin.lib.darwinSystem {
-        inherit system;
+        system = systems.darwin;
 
         specialArgs = {
-          inherit unstable username;
-          guiPkgs = unstable;
+          inherit username;
+          unstable = darwinUnstable;
+          guiPkgs = darwinUnstable;
         };
 
         modules = [
@@ -189,12 +189,8 @@
               useUserPackages = true;
               backupFileExtension = "backup";
 
-              extraSpecialArgs = {
-                inherit unstable;
-                inherit codexModels herdr;
-                guiPkgs = unstable;
-                isNixOnDroid = false;
-                isWsl = false;
+              extraSpecialArgs = mkHomeManagerExtraArgs {
+                unstablePackages = darwinUnstable;
               };
             };
 

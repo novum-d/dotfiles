@@ -28,7 +28,9 @@
 - `modules/darwin`: macOS固有のシステム設定とHomebrew
 - `modules/wsl`: WSL固有のシステム設定
 - `modules/nix-on-droid`: Nix-on-Droid固有のシステム設定
+- `lib`: 複数モジュールから利用するPure Nixヘルパー
 - `docs`: 環境別の導入・復旧・運用手順
+- `boot-strap.sh`: 全OS共通の導入前preflight（activationは実行しない）
 
 ## 必須検証
 

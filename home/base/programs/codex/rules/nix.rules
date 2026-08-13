@@ -1,0 +1,11 @@
+prefix_rule(
+    pattern = ["nix"],
+    decision = "allow",
+    justification = "Allow Nix commands without repeated approval prompts",
+    match = [
+        "nix build .#darwinConfigurations.novumdnoMac-mini.config.system.build.toplevel",
+        "nix eval --raw .#nixosConfigurations.windows-vm.config.system.build.toplevel.drvPath",
+        "nix flake check --no-build --no-warn-dirty",
+        "nix shell nixpkgs#nixfmt --command nixfmt --check flake.nix",
+    ],
+)

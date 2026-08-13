@@ -1,4 +1,4 @@
-# 端末ごとの固有設定のサンプル
+# Mac mini固有のnix-darwin設定
 { pkgs, username, ... }:
 {
   nixpkgs.hostPlatform = "aarch64-darwin"; # または "x86_64-darwin"

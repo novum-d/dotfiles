@@ -3,6 +3,7 @@
   config,
   lib,
   pkgs,
+  syncthing,
   unstable,
   guiPkgs,
   isWsl,
@@ -13,46 +14,11 @@ let
   fcitx5WithMozc = pkgs.qt6Packages.fcitx5-with-addons.override {
     addons = with pkgs; [ fcitx5-mozc ];
   };
-  studio = pkgs.writeShellScriptBin "studio" ''
-    set -u
-
-    export GTK_IM_MODULE=fcitx
-    export QT_IM_MODULE=fcitx
-    export QT_IM_MODULES="wayland;fcitx;ibus"
-    export XMODIFIERS=@im=fcitx
-    export SDL_IM_MODULE=fcitx
-    export STUDIO_VM_OPTIONS="''${XDG_CONFIG_HOME:-$HOME/.config}/Google/AndroidStudio2026.1.1/studio64.vmoptions"
-
-    if [ -z "''${_DOTFILES_STUDIO_DETACHED-}" ]; then
-      export _DOTFILES_STUDIO_DETACHED=1
-      exec ${pkgs.util-linux}/bin/setsid --fork "$0" "$@" </dev/null >/dev/null 2>&1
-    fi
-
-    ${lib.optionalString isWsl ''
-      if [ -z "''${DISPLAY-}" ] && [ -S /tmp/.X11-unix/X0 ]; then
-        export DISPLAY=:0
-      fi
-    ''}
-
-    if [ -z "''${DBUS_SESSION_BUS_ADDRESS-}" ] && command -v dbus-run-session >/dev/null 2>&1; then
-      exec dbus-run-session -- "$0" "$@"
-    fi
-
-    unset _DOTFILES_STUDIO_DETACHED
-
-    if command -v dbus-update-activation-environment >/dev/null 2>&1; then
-      dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XAUTHORITY XMODIFIERS GTK_IM_MODULE QT_IM_MODULE QT_IM_MODULES SDL_IM_MODULE >/dev/null 2>&1 || true
-    fi
-
-    if command -v fcitx5 >/dev/null 2>&1 && [ -n "''${DISPLAY-}" ]; then
-      fcitx5 --disable waylandim -d --replace >/dev/null 2>&1 || true
-      fcitx5-remote -s mozc >/dev/null 2>&1 || true
-      fcitx5-remote -o >/dev/null 2>&1 || true
-    fi
-
-    unset WAYLAND_DISPLAY
-    exec ${unstable.android-studio}/bin/android-studio "$@"
-  '';
+  studioSupport = import ../../lib/android-studio.nix {
+    inherit lib pkgs isWsl;
+    androidStudio = unstable.android-studio;
+  };
+  studio = studioSupport.mkLauncher "studio";
 in
 {
   imports = [
@@ -64,18 +30,9 @@ in
       fcitx5WithMozc
       gcc
       studio
-      #slack
-      #discord
-      #jetbrains.rust-rover
     ];
 
-    sessionVariables = {
-      GTK_IM_MODULE = "fcitx";
-      QT_IM_MODULE = "fcitx";
-      QT_IM_MODULES = "wayland;fcitx;ibus";
-      XMODIFIERS = "@im=fcitx";
-      SDL_IM_MODULE = "fcitx";
-    };
+    sessionVariables = studioSupport.inputMethodEnvironment;
 
     file = {
       ".config/fcitx5/profile" = {
@@ -99,14 +56,9 @@ in
         '';
       };
 
-      ".config/Google/AndroidStudio2026.1.1/studio64.vmoptions" = {
+      "${studioSupport.vmOptionsRelativePath}" = {
         force = true;
-        text = ''
-          -Dawt.toolkit.name=XToolkit
-          -Dsun.awt.enableInputMethods=true
-          -Djava.awt.im.style=on-the-spot
-          -Drecreate.x11.input.method=true
-        '';
+        text = studioSupport.vmOptions;
       };
     };
   };
@@ -132,7 +84,7 @@ in
   services.syncthing = {
     enable = true;
 
-    settings.folders."hrdcr-v7siz" = {
+    settings.folders."${syncthing.obsidianFolderId}" = {
       label = "obsidian";
       path = "${config.home.homeDirectory}/repos/obsidian";
       devices = [ "pixel7pro" ];
@@ -145,12 +97,8 @@ in
       };
     };
 
-    settings.devices."pixel7pro".id = "NMD27JO-BIQEEZU-GWOZSKD-3ZS6RQ5-H6VPOOR-5K3XLEB-OL4WZRU-AT744QM";
+    settings.devices."pixel7pro".id = syncthing.pixel7proDeviceId;
   };
-
-  # programs.anki.enable = true;
-
-  # programs.ghostty.enable = true;
 
   programs.google-chrome = {
     enable = true;
@@ -161,6 +109,4 @@ in
     enable = true;
     package = guiPkgs.obsidian;
   };
-
-  #programs.zed-editor.enable = true;
 }

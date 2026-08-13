@@ -1,0 +1,23 @@
+onboarding = false
+
+[terminal]
+shell_mode = "auto"
+new_cwd = "follow"
+
+[worktrees]
+directory = "~/.local/share/herdr/worktrees"
+
+[update]
+version_check = false
+manifest_check = true
+
+[ui]
+agent_panel_sort = "priority"
+show_agent_labels_on_pane_borders = true
+
+[ui.sidebar.agents]
+rows = [["state_icon", "agent"], ["workspace", "tab"]]
+
+[ui.toast]
+delivery = "herdr"
+delay_seconds = 1

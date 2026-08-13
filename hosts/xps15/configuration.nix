@@ -1,7 +1,7 @@
+# XPS 15固有のNixOS設定
 {
   config,
   pkgs,
-  guiPkgs,
   username,
   ...
 }:
@@ -22,12 +22,15 @@
   console.earlySetup = true;
 
   systemd = {
-    user.services.rc-local = {
-      script = ''
-        evtest --grab /dev/input/event0 > /dev/null 2>&1 &
-      '';
+    # 内蔵キーボードをgrabし、外付けキーボードを主入力として使う。
+    user.services.grab-built-in-keyboard = {
+      description = "Grab the built-in keyboard input device";
       wantedBy = [ "graphical-session.target" ];
       partOf = [ "graphical-session.target" ];
+      serviceConfig = {
+        ExecStart = "${pkgs.evtest}/bin/evtest --grab /dev/input/event0";
+        Restart = "on-failure";
+      };
     };
     targets = {
       sleep.enable = false;
@@ -78,15 +81,6 @@
         '';
       };
     };
-    openssh = {
-      enable = true;
-      settings = {
-        X11Forwarding = true;
-        PermitRootLogin = "no";
-        PasswordAuthentication = false;
-      };
-      openFirewall = true;
-    };
     input-remapper.enable = true;
   };
 
@@ -113,35 +107,6 @@
       "networkmanager"
     ];
     packages = with pkgs; [ firefox ];
-  };
-
-  programs.zsh.enable = true;
-
-  nixpkgs.config.allowUnfree = true;
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
-  nix.settings.trusted-users = [ username ];
-
-  virtualisation.docker.enable = true;
-  virtualisation.docker.rootless = {
-    enable = true;
-    setSocketVariable = true;
-  };
-
-  environment.systemPackages = with pkgs; [
-    git
-    vim
-    wget
-    curl
-    openssl
-    openssl.dev
-    pkg-config
-  ];
-  environment.variables = {
-    EDITOR = "vim";
-    PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
   };
 
   system.stateVersion = "26.05";

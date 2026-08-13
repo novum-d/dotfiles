@@ -1,0 +1,23 @@
+prefix_rule(
+    pattern = ["git"],
+    decision = "allow",
+    justification = "Allow Git operations without repeated approval prompts",
+    match = [
+        "git status --short",
+        "git add -- flake.nix",
+        "git commit -m 'Update configuration'",
+        "git push origin master",
+    ],
+)
+
+prefix_rule(
+    pattern = ["gh"],
+    decision = "allow",
+    justification = "Allow GitHub CLI operations without repeated approval prompts",
+    match = [
+        "gh pr view 123",
+        "gh issue list",
+        "gh run watch 456",
+        "gh pr create --draft",
+    ],
+)

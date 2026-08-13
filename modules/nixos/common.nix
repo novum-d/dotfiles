@@ -1,3 +1,4 @@
+# 実機とWSLで共有するNixOSシステム設定
 { pkgs, username, ... }:
 
 let

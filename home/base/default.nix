@@ -1,4 +1,4 @@
-# 共通のHome Managerの設定ファイル
+# 全プラットフォーム共通のHome Manager設定
 {
   lib,
   pkgs,
@@ -41,7 +41,7 @@ in
 {
   manual.manpages.enable = false;
 
-  # 共通パッケージ
+  # OS固有optionを持つmoduleはhome/darwinまたはhome/linuxからimportする。
   imports = [
     ./programs/zsh
     ./programs/ssh
@@ -140,10 +140,8 @@ in
         ]
       );
 
-    # Nixpkgsのリリースチェックを無効化
     enableNixpkgsReleaseCheck = false;
 
-    # Home Managerの状態バージョンを指定
     stateVersion = "26.05";
 
     sessionVariables = {
@@ -151,6 +149,5 @@ in
     };
   };
 
-  # Home Managerの有効化
   programs.home-manager.enable = true;
 }
