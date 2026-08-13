@@ -12,25 +12,25 @@ git clone https://github.com/novum-d/dotfiles.git ~/repos/dotfiles
 cd ~/repos/dotfiles
 ```
 
-## 2. 共通の初期チェック
+## 2. 共通の初期セットアップ
 
-全OS共通の入口として、他の設定を変更する前にpreflightを実行します。
+全OS共通の入口として、他の設定を変更する前にbootstrapを実行します。
 
 ```shell
 ./boot-strap.sh
 ```
 
-このスクリプトはXcode Command Line Tools、Git、Nixを確認するだけで、nix-darwinのactivationは行いません。Nixが未導入の場合は次の手順でインストールしてから、もう一度実行してください。
+不足しているXcode Command Line Tools、Nix、Gitなどの基本CLIを導入します。nix-darwinのactivationは行いません。Nixの導入後に新しいシェルが必要な場合は、シェルを開き直してから再実行してください。
 
-## 3. Nixをインストールする
+## 3. Nixの導入内容を確認する
 
-[Determinate Nixの公式セットアップ](https://docs.determinate.systems/getting-started/individuals/)からmacOS用インストーラーを取得して実行します。Determinate NixではFlakeが最初から有効です。
-
-インストール後、新しいターミナルを開いて動作を確認します。
+`boot-strap.sh` はmacOS/Linux/WSLでNixが未導入の場合、Determinate Nixの公式インストーラーを使用します。導入後、新しいターミナルを開いて動作を確認します。
 
 ```shell
 nix --version
 ```
+
+公式手順の詳細は [Determinate Nixのセットアップ](https://docs.determinate.systems/getting-started/individuals/) を参照してください。
 
 このリポジトリでは、Determinate Nixとnix-darwinによるNix管理の競合を避けるため、`modules/darwin/default.nix` で `nix.enable = false` を設定しています。
 

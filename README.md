@@ -40,11 +40,11 @@ flake.nix
 
 ## セットアップ
 
-- [全環境共通の初期チェック](boot-strap.sh): clone後、各OSの手順より先に実行
+- [全環境共通の初期セットアップ](boot-strap.sh): clone後、各OSの手順より先に実行
 - [Macセットアップ手順](docs/macos-setup.md)
 - [Nix-on-Droidセットアップ手順](docs/nix-on-droid.md)
 
-clone直後は、まず次のチェックを実行します。Nixのインストールやシステムのactivationは行わず、OSごとの前提条件だけを確認します。
+clone直後は、まず次のスクリプトを実行します。Xcode Command Line ToolsやNixが不足していれば導入し、Nix profileへGitなどの基本CLIを追加します。システムのactivationは行いません。
 
 ```shell
 cd ~/repos/dotfiles

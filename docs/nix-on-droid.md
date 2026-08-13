@@ -40,15 +40,15 @@ nix shell github:NixOS/nixpkgs/nixpkgs-unstable#git \
   --command git pull
 ```
 
-## 共通の初期チェック
+## 共通の初期セットアップ
 
-clone後、設定を反映する前に全環境共通のpreflightを実行します。
+clone後、設定を反映する前に全環境共通のbootstrapを実行します。
 
 ```shell
 ./boot-strap.sh
 ```
 
-GitまたはNixがまだ使えない初期状態では、上記の一時的な `nix shell` を先に使います。
+Gitがまだ使えない初期状態では、上記の一時的な `nix shell` でcloneまたはpullを行います。Nix-on-Droidアプリが提供するNix自体がない場合、先にアプリの初回セットアップを完了してください。bootstrapはその後、Gitなど不足しているCLIをNix profileへ追加します。
 
 ## 設定を反映する
 

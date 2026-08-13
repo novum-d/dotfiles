@@ -23,7 +23,7 @@ Home Managerの共通設定は `home/base` に集約し、OSや端末に固有�
 4. 関連する `docs/` とサンプル設定を確認する。
 5. 外部仕様やパッケージ状態が関係する場合は、公式ドキュメントや実際のNix評価で確認する。
 
-新しい端末へ導入する場合は、clone後に [`boot-strap.sh`](boot-strap.sh) を最初に実行する。このスクリプトは全OS共通の前提確認だけを行い、system activationは実行しない。
+新しい端末へ導入する場合は、clone後に [`boot-strap.sh`](boot-strap.sh) を最初に実行する。このスクリプトはOSごとの不足パッケージとNix profileの基本CLIを導入するが、system activationは実行しない。NixOSのNixやNix-on-DroidアプリのNix runtimeなど、OSが管理するNixがない場合は自動上書きせず復旧案内を表示する。
 
 ユーザーの既存差分は所有物として扱い、関係のない整形、移動、削除、コミットへの混入を行いません。
 
