@@ -16,10 +16,12 @@ Nix Flakeを使用して、macOS、NixOS、WSL、Nix-on-Droidのシステム設�
 - `config`: Flake全体で共有する、秘密情報を含まないPure Nix設定
 - `hosts`: 端末固有のシステム設定
 - `home/base`: 全環境で共有するHome Manager設定
-- `home/darwin`: macOS共通設定
-- `home/nix`: NixOS共通設定
-- `home/wsl-nixos`: WSL共通設定
-- `home/nix-on-droid`: Nix-on-Droid共通設定
+- `home/darwin`: macOS環境で共有するHome Manager設定
+- `home/linux`: Linux環境で共有するHome Manager設定
+- `modules/nixos`: 実機とWSL上のNixOSで共有するシステム設定
+- `modules/darwin`: macOS固有のシステム設定
+- `modules/wsl`: WSL固有のシステム設定
+- `modules/nix-on-droid`: Nix-on-Droid固有のシステム設定
 - `docs`: 環境別のセットアップ手順と運用メモ
 
 ユーザー名は [`config/default.nix`](config/default.nix) で一元管理し、Flake評価時に各ホストへ渡します。このファイルには秘密情報を保存しません。

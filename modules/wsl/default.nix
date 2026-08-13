@@ -87,7 +87,7 @@ let
   '';
 in
 {
-  imports = [ ../nix/configuration.nix ];
+  imports = [ ../nixos/common.nix ];
 
   i18n.inputMethod = {
     enable = true;

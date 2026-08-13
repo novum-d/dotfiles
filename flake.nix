@@ -178,7 +178,7 @@
 
         modules = [
           ./hosts/Mac-mini
-          ./home/darwin
+          ./modules/darwin
 
           home-manager.darwinModules.home-manager
           nix-homebrew.darwinModules.nix-homebrew

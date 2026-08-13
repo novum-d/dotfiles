@@ -14,7 +14,7 @@
   home-manager.users."${username}" =
     { ... }:
     {
-      imports = [ ../../home/base ];
+      imports = [ ../../home/darwin ];
       home.username = username;
       home.homeDirectory = "/Users/${username}";
     };

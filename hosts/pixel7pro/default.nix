@@ -5,7 +5,7 @@
 }:
 
 {
-  imports = [ ../../home/nix-on-droid ];
+  imports = [ ../../modules/nix-on-droid ];
 
   terminal.font = "${pkgs.meslo-lgs-nf}/share/fonts/truetype/MesloLGS NF Regular.ttf";
 

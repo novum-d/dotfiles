@@ -68,7 +68,7 @@ in
     backupFileExtension = "hm-bak";
     useGlobalPkgs = true;
     config = {
-      imports = [ ../base ];
+      imports = [ ../../home/base ];
 
       home.packages = [ droidCodexDuo ];
 

@@ -12,7 +12,7 @@
 nix --version
 ```
 
-このリポジトリでは、Determinate Nixとnix-darwinによるNix管理の競合を避けるため、`home/darwin/default.nix` で `nix.enable = false` を設定しています。
+このリポジトリでは、Determinate Nixとnix-darwinによるNix管理の競合を避けるため、`modules/darwin/default.nix` で `nix.enable = false` を設定しています。
 
 ## 2. リポジトリをcloneする
 

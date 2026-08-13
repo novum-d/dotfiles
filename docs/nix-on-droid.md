@@ -5,7 +5,8 @@ Android 上の Nix-on-Droid にこの dotfiles を導入し、Flake の設定を
 ## 設定構成
 
 - `hosts/pixel7pro`: Pixel 7 Pro 固有の設定
-- `home/nix-on-droid`: Nix-on-Droid 端末で共有する設定
+- `modules/nix-on-droid`: Nix-on-Droid 端末で共有するシステム設定
+- `home/base`: 全環境で共有するHome Manager設定
 - `nixOnDroidConfigurations.pixel7pro`: Pixel 7 Pro 用の Flake 出力
 - `nixOnDroidConfigurations.default`: `pixel7pro` を指す互換用の別名
 

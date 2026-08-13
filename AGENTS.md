@@ -22,11 +22,12 @@
 - `hosts/<host>`: 端末固有設定
 - `home/base`: 全プラットフォーム共通のHome Manager設定
 - `home/base/programs/<tool>`: ツール単位のHome Manager設定
-- `home/darwin`: macOS共通のシステム設定とHomebrew
-- `home/nix/configuration.nix`: NixOS共通のシステム設定
-- `home/nix/default.nix`: Linux系Home Manager設定
-- `home/wsl-nixos`: WSL固有設定
-- `home/nix-on-droid`: Nix-on-Droid固有設定
+- `home/darwin`: macOS系Home Manager設定
+- `home/linux`: Linux系Home Manager設定
+- `modules/nixos`: NixOS共通のシステム設定
+- `modules/darwin`: macOS固有のシステム設定とHomebrew
+- `modules/wsl`: WSL固有のシステム設定
+- `modules/nix-on-droid`: Nix-on-Droid固有のシステム設定
 - `docs`: 環境別の導入・復旧・運用手順
 
 ## 必須検証

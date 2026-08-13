@@ -9,7 +9,7 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ../../home/nix/configuration.nix
+    ../../modules/nixos/common.nix
   ];
 
   boot = {

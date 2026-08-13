@@ -1,7 +1,7 @@
 { username, ... }:
 
 {
-  imports = [ ../../home/wsl-nixos ];
+  imports = [ ../../modules/wsl ];
 
   wsl = {
     enable = true;

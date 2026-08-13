@@ -1,4 +1,4 @@
-# Karabiner-Elements設定
+# macOS向けKarabiner-Elements設定
 { pkgs, ... }:
 
 let

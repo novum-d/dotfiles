@@ -43,7 +43,7 @@ Start-Process -FilePath 'C:\Program Files\usbipd-win\usbipd.exe' -ArgumentList '
 
 ## NixOS 側の設定
 
-`hosts/windows-vm/default.nix` に VM 固有の USB/IP 設定、`home/wsl-nixos/default.nix` に共有する ADB・Android Studio 設定を入れる。
+`hosts/windows-vm/default.nix` に VM 固有の USB/IP 設定、`modules/wsl/default.nix` に共有する ADB・Android Studio 設定を入れる。
 
 ```nix
 {
@@ -151,16 +151,16 @@ Android Studio の設定ディレクトリ名が変わった場合は、`Android
 
 変更箇所:
 
-- `home/nix/default.nix`
+- `home/linux/default.nix`
   - `STUDIO_VM_OPTIONS` のパス
   - `home.file.".config/Google/AndroidStudio2026.1.1/studio64.vmoptions"`
-- `home/wsl-nixos/default.nix`
+- `modules/wsl/default.nix`
   - `androidStudioWsl` 内の `STUDIO_VM_OPTIONS` のパス
 
 確認コマンド:
 
 ```shell
-rg -n "AndroidStudio[0-9]" home/nix/default.nix home/wsl-nixos/default.nix
+rg -n "AndroidStudio[0-9]" home/linux/default.nix modules/wsl/default.nix
 ```
 
 変更後は WSL/NixOS 設定を評価してから反映する。

@@ -46,7 +46,6 @@ in
     ./programs/zsh
     ./programs/ssh
     ./programs/git
-    ./programs/karabiner
     ./programs/lazyvim
     ./programs/continue
     ./programs/jetbrains-toolbox

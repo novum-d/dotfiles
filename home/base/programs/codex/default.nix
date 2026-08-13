@@ -14,6 +14,24 @@ let
   fallbackModel = codexModels.fallback.model;
   fallbackReasoningEffort = codexModels.fallback.reasoningEffort;
 
+  # Codexのproject trustは親ディレクトリから継承されず、リポジトリルートの
+  # 完全一致で判定される。Home Manager管理のconfig.tomlは読み取り専用なので、
+  # 利用するリポジトリをここで宣言し、TUIによる書き戻しを発生させない。
+  trustedRepositoryNames = [
+    "TvApp"
+    "android-platform-research"
+    "base"
+    "dotfiles"
+    "obsidian"
+    "zunda-bot-rs"
+  ];
+  trustedRepositories = lib.listToAttrs (
+    map (name: {
+      name = "${config.home.homeDirectory}/repos/${name}";
+      value.trust_level = "trusted";
+    }) trustedRepositoryNames
+  );
+
   legacyIsatty = pkgs.runCommandCC "codex-legacy-isatty" { } ''
     mkdir -p "$out/lib"
     "$CC" \
@@ -420,13 +438,9 @@ in
       model = primaryModel;
       model_reasoning_effort = primaryReasoningEffort;
       projects = {
-        "${config.home.homeDirectory}" = {
-          trust_level = "trusted";
-        };
-        "${config.home.homeDirectory}/repos/dotfiles" = {
-          trust_level = "trusted";
-        };
+        "${config.home.homeDirectory}".trust_level = "trusted";
       }
+      // trustedRepositories
       // lib.optionalAttrs isNixOnDroid {
         "/storage/emulated/0/Sync/obsidian" = {
           trust_level = "trusted";

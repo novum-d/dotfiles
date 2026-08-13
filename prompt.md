@@ -67,11 +67,12 @@ Codexの既定sandboxは `workspace-write` を維持し、Home Managerのhome di
 | 公開可能な共通ユーザー値 | `config/default.nix` |
 | 全環境共通のCLIパッケージ | `home/base/default.nix` |
 | ツール固有の設定 | `home/base/programs/<tool>/default.nix` |
-| macOS defaults、Homebrew、launchd | `home/darwin/default.nix` |
-| NixOS共通のsystem設定 | `home/nix/configuration.nix` |
-| Linux系のHome Manager設定 | `home/nix/default.nix` |
-| WSL固有のinterop、USB、GUI起動 | `home/wsl-nixos/default.nix` |
-| Nix-on-Droid固有の端末・activation設定 | `home/nix-on-droid/default.nix` |
+| macOS系のHome Manager設定 | `home/darwin/default.nix` |
+| macOS defaults、Homebrew、launchd | `modules/darwin/default.nix` |
+| NixOS共通のシステム設定 | `modules/nixos/common.nix` |
+| Linux系のHome Manager設定 | `home/linux/default.nix` |
+| WSL固有のinterop、USB、GUI起動 | `modules/wsl/default.nix` |
+| Nix-on-Droid固有の端末・activation設定 | `modules/nix-on-droid/default.nix` |
 | ハードウェア、ホスト名、端末固有override | `hosts/<host>` |
 | 導入・復旧・運用手順 | `docs/` |
 
@@ -79,7 +80,8 @@ Codexの既定sandboxは `workspace-write` を維持し、Home Managerのhome di
 
 - 複数環境で必要なCLIは `home/base` へ置く。
 - 設定を伴うツールは専用モジュールを作成し、`home/base/default.nix` からimportする。
-- macOSのGUIアプリは原則 `home/darwin/default.nix` のHomebrew caskで管理する。
+- macOSのGUIアプリは原則 `modules/darwin/default.nix` のHomebrew caskで管理する。
+- macOSだけで使うHome Manager設定は `home/darwin` に置き、`home/base` へ無条件にimportしない。
 - Linuxだけで利用可能なパッケージには `lib.optionals` または `lib.meta.availableOn` を使う。
 - AI系CLIは、特別な理由がない限り `nixpkgs-unstable` の `unstable` から取得する。
 - 同じパッケージをsystem packages、Home Manager、Homebrewへ重複配置しない。
@@ -114,21 +116,22 @@ Codexの既定sandboxは `workspace-write` を維持し、Home Managerのhome di
 
 ### macOS
 
-- `home/darwin/default.nix` ではDeterminate Nixとの競合を避けるため `nix.enable = false` を維持する。
+- `modules/darwin/default.nix` ではDeterminate Nixとの競合を避けるため `nix.enable = false` を維持する。
+- `home/darwin/default.nix` はmacOS向けHome Manager entrypointであり、`home/base` とmacOS固有設定をimportする。
 - `nix-homebrew` はApple Silicon側とRosetta側のprefixを管理している。
 - `homebrew.onActivation.cleanup = "zap"` のため、cask削除は次回activationで実アプリの削除につながる。削除対象を明確に確認する。
 - 初回導入と通常更新は `docs/macos-setup.md` を正本とする。
 
 ### NixOS
 
-- `home/nix/configuration.nix` は共通のNixOS system moduleである。
-- `home/nix/default.nix` はHome Manager entrypointであり、system設定を置かない。
+- `modules/nixos/common.nix` は共通のNixOSシステムmoduleである。
+- `home/linux/default.nix` はHome Manager entrypointであり、システム設定を置かない。
 - `hosts/xps15` にはハードウェアとNVIDIA固有設定があるため、共有層へ移す前に他ホストへの影響を確認する。
 
 ### WSL
 
 - Flake出力名とホスト名は `windows-vm` である。
-- WSL固有のWindows interop、`wsl-open`、USB auto-attach、Android Studio起動処理は `home/wsl-nixos` と `hosts/windows-vm` に保つ。
+- WSL固有のWindows interop、`wsl-open`、Android Studio起動処理は `modules/wsl` に、USB auto-attachなどのホスト固有値は `hosts/windows-vm` に保つ。
 - Windows側のPowerShell資材は `windows/` に置き、Nixモジュールと役割を混在させない。
 
 ### Nix-on-Droid

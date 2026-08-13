@@ -1,4 +1,4 @@
-# 共通のHome Managerの設定ファイル
+# Linux共通のHome Manager設定
 {
   config,
   lib,

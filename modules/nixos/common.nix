@@ -118,7 +118,7 @@ in
     { ... }:
     {
       imports = [
-        ./.
+        ../../home/linux
       ];
       home.username = username;
       home.homeDirectory = "/home/${username}";
