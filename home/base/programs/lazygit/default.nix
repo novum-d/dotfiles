@@ -12,14 +12,13 @@ let
       "${config.home.homeDirectory}/Library/Application Support/lazygit/config.yml"
     else
       "${config.xdg.configHome}/lazygit/config.yml";
+  localGitConfigFile = "${config.home.homeDirectory}/.gitconfig.local";
 
-  # Configure a self-managed GitLab instance with:
-  # export GITLAB_HOST=https://gitlab.example.com
+  # Configure a self-managed GitLab instance in ~/.gitconfig.local with:
+  # [lazygit]
+  #   gitlabHost = gitlab.example.com
   lazygit = pkgs.writeShellScriptBin "lazygit" ''
-    gitlab_host="''${GITLAB_HOST:-}"
-    if [[ -z "$gitlab_host" ]]; then
-      gitlab_host="''${GL_HOST:-}"
-    fi
+    gitlab_host="$(${pkgs.git}/bin/git config --file "${localGitConfigFile}" --get lazygit.gitlabHost 2>/dev/null || true)"
 
     if [[ -z "$gitlab_host" ]]; then
       exec ${unstable.lazygit}/bin/lazygit "$@"
@@ -30,7 +29,7 @@ let
     gitlab_host="''${gitlab_host%/}"
 
     if [[ ! "$gitlab_host" =~ ^[A-Za-z0-9._-]+(:[0-9]+)?$ ]]; then
-      echo "lazygit: GITLAB_HOST must be a hostname with an optional port" >&2
+      echo "lazygit: lazygit.gitlabHost in ${localGitConfigFile} must be a hostname with an optional port" >&2
       exit 2
     fi
 

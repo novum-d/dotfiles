@@ -1,3 +1,7 @@
 [user]
   name = Your Name
   email = you@example.com
+
+[lazygit]
+  # Self-managed GitLab host used for Lazygit's services mapping.
+  # gitlabHost = gitlab.example.com
