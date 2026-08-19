@@ -59,6 +59,17 @@ let
 
     exec "$powershell_path" "$@"
   '';
+  windowsWsl = pkgs.writeShellScriptBin "wsl.exe" ''
+    set -eu
+
+    wsl_path=/mnt/c/Windows/System32/wsl.exe
+    if [ ! -x "$wsl_path" ]; then
+      echo "wsl.exe: Windows WSL command not found at $wsl_path" >&2
+      exit 127
+    fi
+
+    exec "$wsl_path" "$@"
+  '';
 in
 {
   imports = [ ../nixos/common.nix ];
@@ -105,6 +116,7 @@ in
       android-tools
       androidStudioWsl
       windowsPowerShell
+      windowsWsl
       wslOpen
     ];
     variables.BROWSER = "wsl-open";
