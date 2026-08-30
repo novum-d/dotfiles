@@ -106,7 +106,10 @@
     extraGroups = [
       "networkmanager"
     ];
-    packages = with pkgs; [ firefox ];
+    packages = with pkgs; [
+      anki
+      firefox
+    ];
   };
 
   system.stateVersion = "26.05";
