@@ -78,8 +78,12 @@ in
 
   homebrew = {
     enable = true;
-    # 宣言から外したformula/caskも次回activationで削除する。
-    onActivation.cleanup = "zap";
+    onActivation = {
+      autoUpdate = true;
+      upgrade = true;
+      # 宣言から外したformula/caskも次回activationで削除する。
+      cleanup = "zap";
+    };
     brews = [
       "mas"
       "ollama"
@@ -97,6 +101,7 @@ in
       "jetbrains-toolbox"
       "obsidian"
       "slack"
+      "microsoft-teams"
       "zed"
     ];
   };

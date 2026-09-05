@@ -138,7 +138,7 @@
       g = "git";
       n = "nvim";
       u =
-        if pkgs.stdenv.isDarwin then
+        if pkgs.stdenv.hostPlatform.isDarwin then
           "sudo darwin-rebuild switch --flake ."
         else
           "sudo nixos-rebuild switch --flake .";

@@ -15,6 +15,28 @@ let
   fallbackModel = codexModels.fallback.model;
   fallbackReasoningEffort = codexModels.fallback.reasoningEffort;
 
+  # nixpkgs-unstable can lag behind Codex's rapid release cadence. Keep the
+  # package definition from nixpkgs and override only until it catches up.
+  codexMinimumVersion = "0.153.1";
+  codexPackage =
+    if lib.versionAtLeast unstable.codex.version codexMinimumVersion then
+      unstable.codex
+    else
+      unstable.codex.overrideAttrs (_: rec {
+        version = codexMinimumVersion;
+        src = unstable.fetchFromGitHub {
+          owner = "openai";
+          repo = "codex";
+          tag = "rust-v${version}";
+          hash = "sha256-u7bp0B3MUuPIlk1QUKz267EGedjwMgTaoSNoYI5piLQ=";
+        };
+        cargoDeps = unstable.rustPlatform.fetchCargoVendor {
+          inherit src;
+          sourceRoot = "${src.name}/codex-rs";
+          hash = "sha256-GG6kOXmCdq+bZLU2ul0DIVL8lDuweayvZvXn6+bcUZw=";
+        };
+      });
+
   # Codexのproject trustは親ディレクトリから継承されず、リポジトリルートの
   # 完全一致で判定される。Home Manager管理のconfig.tomlは読み取り専用なので、
   # 利用するリポジトリをここで宣言し、TUIによる書き戻しを発生させない。
@@ -88,15 +110,15 @@ let
       ]
     }:$PATH"
 
-    exec ${unstable.codex}/bin/.codex-wrapped "$@"
+    exec ${codexPackage}/bin/.codex-wrapped "$@"
   '';
 
-  codexBasePackage = if isNixOnDroid then codexForNixOnDroid else unstable.codex;
+  codexBasePackage = if isNixOnDroid then codexForNixOnDroid else codexPackage;
 
   codexWithFallback = pkgs.writeShellApplication {
     name = "codex";
     # Home Manager uses the package version to select config.toml instead of legacy config.yaml.
-    passthru.version = unstable.codex.version;
+    passthru.version = codexPackage.version;
     runtimeInputs = [ pkgs.jq ];
     text = ''
       preferred_model="${primaryModel}"
@@ -169,6 +191,9 @@ in
     settings = {
       approval_policy = "on-request";
       approvals_reviewer = "auto_review";
+      # Nixで更新を一元管理しているため、CLI自身の更新通知を止める。
+      check_for_update_on_startup = false;
+      features.context_management.experimental_mode = true;
       mcp_servers.openaiDeveloperDocs.url = "https://developers.openai.com/mcp";
       model = primaryModel;
       model_reasoning_effort = primaryReasoningEffort;
@@ -185,6 +210,14 @@ in
       sandbox_workspace_write = {
         network_access = true;
         writable_roots = [ config.home.homeDirectory ];
+      };
+      # Codexが非表示のときだけ完了・承認要求を通知する。
+      tui = {
+        notifications = [
+          "agent-turn-complete"
+          "approval-requested"
+        ];
+        notification_condition = "unfocused";
       };
     };
   };

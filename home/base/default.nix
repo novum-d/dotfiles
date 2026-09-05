@@ -131,7 +131,7 @@ in
         unstable.gh
         unstable.terraform
       ])
-      ++ lib.optionals pkgs.stdenv.isLinux (
+      ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux (
         with pkgs;
         [
           wl-clipboard
