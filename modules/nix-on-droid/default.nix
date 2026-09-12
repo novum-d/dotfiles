@@ -71,6 +71,8 @@ in
     config = {
       imports = [ ../../home/base ];
 
+      dotfiles.herdr.autoStart = false;
+
       home.packages = [ droidCodexDuo ];
 
       programs.zsh.shellAliases = {

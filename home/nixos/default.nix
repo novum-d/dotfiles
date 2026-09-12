@@ -1,4 +1,4 @@
-# Linux共通のHome Manager設定
+# NixOS共通のHome Manager設定
 {
   config,
   lib,

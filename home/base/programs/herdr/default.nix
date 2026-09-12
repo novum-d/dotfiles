@@ -239,52 +239,62 @@ let
   '';
 in
 {
-  home.packages = [
-    herdrPackage
-    herdrBootstrapCodex
-    codexRole
-    herdrCodexRole
-    pmArchitectIosStack
-    vaultPmArchitectIosStack
-  ]
-  ++ directRoleCommands
-  ++ herdrRoleCommands
-  ++ shortHerdrRoleCommands;
-
-  xdg.configFile = rolePromptFiles // {
-    "herdr/config.toml".source = ./config.toml;
+  options.dotfiles.herdr.autoStart = lib.mkOption {
+    type = lib.types.bool;
+    default = true;
+    description = "Whether to start Herdr automatically in top-level interactive terminals.";
   };
 
-  programs.zsh = {
-    shellAliases = {
-      hd = "herdr";
-      hdb = "herdr-bootstrap-codex";
-      hdl = "herdr agent list";
-      hds = "herdr session list";
-      hdi = "herdr integration status";
-      hdr = "herdr server reload-config";
-      hdw = "herdr worktree list";
-      hmobile = "hpm-harch-hios";
-      htrio = "hpm-harch-hios";
-      hvault3 = "hvault";
+  config = {
+    home.packages = [
+      herdrPackage
+      herdrBootstrapCodex
+      codexRole
+      herdrCodexRole
+      pmArchitectIosStack
+      vaultPmArchitectIosStack
+    ]
+    ++ directRoleCommands
+    ++ herdrRoleCommands
+    ++ shortHerdrRoleCommands;
+
+    xdg.configFile = rolePromptFiles // {
+      "herdr/config.toml".source = ./config.toml;
     };
 
-    initContent = lib.mkOrder 2100 ''
-      hagent() {
-        if [[ $# -lt 2 ]]; then
-          echo "usage: hagent <name> <command> [args...]" >&2
-          return 64
-        fi
+    programs.zsh = {
+      shellAliases = {
+        hd = "herdr";
+        hdb = "herdr-bootstrap-codex";
+        hdl = "herdr agent list";
+        hds = "herdr session list";
+        hdi = "herdr integration status";
+        hdr = "herdr server reload-config";
+        hdw = "herdr worktree list";
+        hmobile = "hpm-harch-hios";
+        htrio = "hpm-harch-hios";
+        hvault3 = "hvault";
+      };
 
-        local name="$1"
-        shift
-        herdr agent start "$name" --cwd "$PWD" -- "$@"
-      }
+      initContent = lib.mkOrder 2100 ''
+        hagent() {
+          if [[ $# -lt 2 ]]; then
+            echo "usage: hagent <name> <command> [args...]" >&2
+            return 64
+          fi
 
-      # Herdr panes set HERDR_ENV, so only the top-level terminal starts the UI.
-      if [[ -o interactive && -t 0 && -t 1 && ''${SHLVL:-1} -eq 1 && -z "''${HERDR_ENV:-}" ]]; then
-        command herdr
-      fi
-    '';
+          local name="$1"
+          shift
+          herdr agent start "$name" --cwd "$PWD" -- "$@"
+        }
+
+        ${lib.optionalString config.dotfiles.herdr.autoStart ''
+          # Herdr panes set HERDR_ENV, so only the top-level terminal starts the UI.
+          if [[ -o interactive && -t 0 && -t 1 && ''${SHLVL:-1} -eq 1 && -z "''${HERDR_ENV:-}" ]]; then
+            command herdr
+          fi
+        ''}
+      '';
+    };
   };
 }

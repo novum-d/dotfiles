@@ -22,8 +22,9 @@
 - `hosts/<host>`: 端末固有設定
 - `home/base`: 全プラットフォーム共通のHome Manager設定
 - `home/base/programs/<tool>`: ツール単位のHome Manager設定
+- `home/base/scripts/<command>`: 全プラットフォーム共通の自作shellコマンド
 - `home/darwin`: macOS系Home Manager設定
-- `home/linux`: Linux系Home Manager設定
+- `home/nixos`: NixOS・NixOS-WSL系Home Manager設定
 - `modules/nixos`: NixOS共通のシステム設定
 - `modules/darwin`: macOS固有のシステム設定とHomebrew
 - `modules/wsl`: WSL固有のシステム設定

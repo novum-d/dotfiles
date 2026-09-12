@@ -31,7 +31,8 @@ flake.nix
 主な設計方針は次のとおりです。
 
 - `home/base` は全環境で使えるCLIとユーザー設定だけを持つ。
-- `home/darwin` と `home/linux` はOS固有のHome Manager設定を追加する。
+- `home/base/scripts` は全環境で使う自作shellコマンドをコマンド単位で管理する。
+- `home/darwin` と `home/nixos` は、それぞれmacOS系とNixOS・NixOS-WSL系のHome Manager設定を追加する。
 - `modules/nixos`、`modules/darwin`、`modules/wsl`、`modules/nix-on-droid` はシステム設定を持つ。
 - 重複する生成処理は `lib` のPure Nix関数へ抽出する。
 - 秘密情報とGit identityはリポジトリ外のローカル設定へ分離する。

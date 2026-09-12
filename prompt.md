@@ -69,10 +69,11 @@ Codexの既定sandboxは `workspace-write` を維持し、Home Managerのhome di
 | 公開可能な共通ユーザー値 | `config/default.nix` |
 | 全環境共通のCLIパッケージ | `home/base/default.nix` |
 | ツール固有の設定 | `home/base/programs/<tool>/default.nix` |
+| 全環境共通の自作shellコマンド | `home/base/scripts/<command>` |
 | macOS系のHome Manager設定 | `home/darwin/default.nix` |
 | macOS defaults、Homebrew、launchd | `modules/darwin/default.nix` |
 | NixOS共通のシステム設定 | `modules/nixos/common.nix` |
-| Linux系のHome Manager設定 | `home/linux/default.nix` |
+| NixOS・NixOS-WSL系のHome Manager設定 | `home/nixos/default.nix` |
 | WSL固有のinterop、USB、GUI起動 | `modules/wsl/default.nix` |
 | Nix-on-Droid固有の端末・activation設定 | `modules/nix-on-droid/default.nix` |
 | ハードウェア、ホスト名、端末固有override | `hosts/<host>` |
@@ -101,7 +102,8 @@ Codexの既定sandboxは `workspace-write` を維持し、Home Managerのhome di
 
 ### シェルスクリプト
 
-- 再現可能なコマンドは `pkgs.writeShellScriptBin` を優先する。
+- 全環境共通の自作コマンドは `home/base/scripts/<command>` に置き、Nixによるパッケージ化とshell本体を `default.nix` と `<command>.sh` に分離する。
+- 再現可能なコマンドは `pkgs.writeShellApplication` または `pkgs.writeShellScriptBin` を使用する。
 - `set -eu` を基本とし、引数を `"$@"` で保持する。
 - Darwin、Linux、WSLのコマンド差は実行時またはNix評価時に明示的に分岐する。
 - Nixの複数行文字列内でshell変数を書く場合は、Nix展開とshell展開を混同しない。
@@ -129,7 +131,7 @@ Codexの既定sandboxは `workspace-write` を維持し、Home Managerのhome di
 ### NixOS
 
 - `modules/nixos/common.nix` は共通のNixOSシステムmoduleである。
-- `home/linux/default.nix` はHome Manager entrypointであり、システム設定を置かない。
+- `home/nixos/default.nix` はNixOSとNixOS-WSL向けのHome Manager entrypointであり、システム設定を置かない。
 - `hosts/xps15` にはハードウェアとNVIDIA固有設定があるため、共有層へ移す前に他ホストへの影響を確認する。
 
 ### WSL

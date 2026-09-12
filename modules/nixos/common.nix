@@ -119,7 +119,7 @@ in
     { ... }:
     {
       imports = [
-        ../../home/linux
+        ../../home/nixos
       ];
       home.username = username;
       home.homeDirectory = "/home/${username}";
