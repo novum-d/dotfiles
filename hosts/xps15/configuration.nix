@@ -7,11 +7,13 @@
 }:
 
 {
+  # 自動生成されたハードウェア設定と、NixOS共通設定を土台にする。
   imports = [
     ./hardware-configuration.nix
     ../../modules/nixos/common.nix
   ];
 
+  # UEFI起動を構成し、競合するnouveauドライバーを無効にする。
   boot = {
     loader = {
       systemd-boot.enable = true;
@@ -32,6 +34,7 @@
         Restart = "on-failure";
       };
     };
+    # この端末は常時稼働させるため、サスペンド系targetを無効にする。
     targets = {
       sleep.enable = false;
       suspend.enable = false;
@@ -43,17 +46,20 @@
   networking.hostName = "nixos";
   networking.networkmanager.enable = true;
 
+  # デスクトップとアプリでMozcを利用できるようfcitx5を有効にする。
   i18n.inputMethod = {
     enable = true;
     type = "fcitx5";
     fcitx5.addons = with pkgs; [ fcitx5-mozc ];
   };
 
+  # 仮想コンソールでも読みやすいTerminusフォントを使う。
   console = {
     font = "ter-i32b";
     packages = with pkgs; [ terminus_font ];
   };
 
+  # GNOMEデスクトップ、印刷、音声、タッチパッドなど実機の周辺機能を構成する。
   services = {
     xserver = {
       enable = true;
@@ -84,6 +90,7 @@
     input-remapper.enable = true;
   };
 
+  # Intel GPUを表示側、NVIDIA GPUを必要時だけ使うPRIME offload構成。
   hardware.graphics.enable = true;
   hardware.nvidia = {
     modesetting.enable = true;
@@ -102,6 +109,7 @@
 
   security.rtkit.enable = true;
 
+  # この端末だけで使うGUIアプリとNetworkManager権限をユーザーへ追加する。
   users.users."${username}" = {
     extraGroups = [
       "networkmanager"

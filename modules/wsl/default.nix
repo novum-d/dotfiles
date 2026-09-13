@@ -7,6 +7,7 @@
 }:
 
 let
+  # WSLg上のGUIアプリでMozcを利用できるfcitx5パッケージを作る。
   fcitx5WithMozc = pkgs.qt6Packages.fcitx5-with-addons.override {
     addons = with pkgs; [ fcitx5-mozc ];
   };
@@ -15,6 +16,8 @@ let
     androidStudio = unstable.android-studio;
     isWsl = true;
   };
+
+  # Android Studio本体、WSL向け起動ラッパー、デスクトップエントリーを1パッケージへまとめる。
   androidStudioWsl = pkgs.symlinkJoin {
     name = "android-studio-wsl";
     paths = [
@@ -33,6 +36,8 @@ let
       })
     ];
   };
+
+  # LinuxのパスはWindows形式へ変換し、URLなどはそのまま既定アプリで開く。
   wslOpen = pkgs.writeShellScriptBin "wsl-open" ''
     set -eu
 
@@ -48,6 +53,8 @@ let
 
     exec powershell.exe -NoProfile -Command "& { param([string]\$target) Start-Process \$target }" "$target"
   '';
+
+  # Windows側の実体を明示して、PATH継承に依存せずPowerShellを呼び出す。
   windowsPowerShell = pkgs.writeShellScriptBin "powershell.exe" ''
     set -eu
 
@@ -59,6 +66,8 @@ let
 
     exec "$powershell_path" "$@"
   '';
+
+  # HerdrなどからWindows側のWSL CLIを確実に呼べるラッパー。
   windowsWsl = pkgs.writeShellScriptBin "wsl.exe" ''
     set -eu
 
@@ -72,8 +81,10 @@ let
   '';
 in
 {
+  # WSL固有差分の土台として、実機と共有するNixOS設定を先に読み込む。
   imports = [ ../nixos/common.nix ];
 
+  # 右ShiftでMozcを切り替えられる日本語入力環境をWSLgへ提供する。
   i18n.inputMethod = {
     enable = true;
     enableGtk2 = true;
@@ -101,12 +112,15 @@ in
     };
   };
 
+  # 動的リンカーを前提とする一般的なLinuxバイナリをNixOS上で実行可能にする。
   programs.nix-ld.enable = true;
 
+  # USB/IP経由で接続するAndroid端末を一般ユーザーからadbで扱えるようにする。
   services.udev.extraRules = ''
     SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", MODE:="0666", TAG+="uaccess"
   '';
 
+  # WSLとWindowsを橋渡しするCLIとGUI起動ラッパーをシステム全体へ提供する。
   environment = {
     systemPackages = with pkgs; [
       kmod

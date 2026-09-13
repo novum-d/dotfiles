@@ -2,7 +2,10 @@
 { pkgs, username, ... }:
 
 let
+  # launchdジョブと同期スクリプトで共通利用するユーザーのホームディレクトリ。
   homeDirectory = "/Users/${username}";
+
+  # ObsidianのGTDディレクトリだけをGoogle Driveへ週次同期する。
   obsidianGtdGoogleDriveSync = pkgs.writeShellScript "obsidian-gtd-google-drive-sync" ''
     set -eu
 
@@ -23,6 +26,8 @@ let
       --max-delete 100 \
       --log-level INFO
   '';
+
+  # 常駐CLIをログイン時に起動し、終了した場合もlaunchdに再起動させる。
   mkKeepAliveAgent = programArguments: {
     serviceConfig = {
       ProgramArguments = programArguments;
@@ -38,8 +43,10 @@ in
   # Homebrew caskと同様に、非自由ライセンスのGUIアプリを許可する。
   nixpkgs.config.allowUnfree = true;
 
+  # ログインシェルとして選べるよう、zshを許可済みshellへ登録する。
   environment.shells = [ pkgs.zsh ];
 
+  # キーリピート、Finder、Dock、トラックパッドのmacOS既定値を宣言する。
   system.defaults = {
     NSGlobalDomain = {
       InitialKeyRepeat = 10;
@@ -76,6 +83,7 @@ in
     remapCapsLockToControl = true;
   };
 
+  # Homebrewでしか配布されないCLI・GUIアプリをnix-darwinのactivationで同期する。
   homebrew = {
     enable = true;
     onActivation = {
@@ -106,7 +114,9 @@ in
     ];
   };
 
+  # Homebrewで導入した常駐サービスと定期同期処理をユーザー権限で動かす。
   launchd.user.agents = {
+    # ファイル同期とローカルLLMサーバーは、ログイン後に常駐させる。
     syncthing = mkKeepAliveAgent [
       "/opt/homebrew/bin/syncthing"
       "serve"
@@ -118,6 +128,7 @@ in
       "serve"
     ];
 
+    # 毎週月曜の正午にGTDディレクトリをGoogle Driveへ同期する。
     obsidian-gtd-google-drive-sync = {
       serviceConfig = {
         ProgramArguments = [ "${obsidianGtdGoogleDriveSync}" ];

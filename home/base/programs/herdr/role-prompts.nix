@@ -1,6 +1,7 @@
 { rolePrompt }:
 
 {
+  # 各属性名をロール名として使い、共通headerを付けたprompt本文を返す。
   pm = rolePrompt "pm" ''
     You are Codex acting as a Product Manager in a multi-agent workspace.
 

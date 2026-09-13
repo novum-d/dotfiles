@@ -8,7 +8,10 @@
 }:
 
 let
+  # 現在のプラットフォームに対応するHerdrパッケージをFlake入力から選ぶ。
   herdrPackage = herdr.packages.${pkgs.stdenv.hostPlatform.system}.default;
+
+  # promptを変更したときはrevisionを上げ、古い指示のsessionを再利用しない。
   rolePromptRevision = "4";
   vaultPath = "${config.home.homeDirectory}/repos/obsidian/vault";
 
@@ -16,6 +19,7 @@ let
     Do not mention, compare, or report the model or reasoning effort unless the user explicitly asks about them.
   '';
 
+  # 各ロールへ継続性を判定するkeyと共通指示を付加する。
   rolePrompt = role: text: ''
     Herdr continuity key: codex-role/${role}/rev-${rolePromptRevision}
 
@@ -29,10 +33,12 @@ let
   roleNames = builtins.attrNames rolePrompts;
   roleList = lib.concatStringsSep " " roleNames;
 
+  # Nix属性のロール定義を、Codexが直接読めるMarkdownファイルへ展開する。
   rolePromptFiles = lib.mapAttrs' (
     name: text: lib.nameValuePair "codex/roles/${name}.md" { inherit text; }
   ) rolePrompts;
 
+  # 作業ディレクトリとロールが一致する直近sessionを探し、再開または新規起動する。
   codexRole = pkgs.writeShellScriptBin "codex-role" ''
     set -eu
 
@@ -59,6 +65,7 @@ let
     session_id=""
     session_rollout=""
 
+    # 複数あるstate DBのうち、更新日時が最も新しいものを選ぶ。
     for candidate in "$codex_home"/state_*.sqlite; do
       if [ -f "$candidate" ] && { [ -z "$state_db" ] || [ "$candidate" -nt "$state_db" ]; }; then
         state_db="$candidate"
@@ -94,6 +101,7 @@ let
       task="$*"
     fi
 
+    # 中断されたturnはresumeせずforkし、履歴を保持した新しい分岐から再開する。
     if [ -n "$session_id" ]; then
       session_command="resume"
 
@@ -135,6 +143,7 @@ let
     exec codex -C "$workspace" "$prompt"
   '';
 
+  # 指定ロールのCodexを新しいHerdrペインとして起動する共通ラッパー。
   herdrCodexRole = pkgs.writeShellScriptBin "herdr-codex-role" ''
     set -eu
 
@@ -151,6 +160,7 @@ let
     exec ${herdrPackage}/bin/herdr agent start "$agent_name" --cwd "$PWD" -- ${codexRole}/bin/codex-role "$role" "$@"
   '';
 
+  # `codex-pm`と`hcodex-pm`のようなロール別コマンドを定義から自動生成する。
   directRoleCommands = lib.mapAttrsToList (
     role: _:
     pkgs.writeShellScriptBin "codex-${role}" ''
@@ -165,6 +175,7 @@ let
     ''
   ) rolePrompts;
 
+  # PM、Architect、iOSを横並びの3ペインで起動する定型チーム。
   pmArchitectIosStack = pkgs.writeShellScriptBin "hpm-harch-hios" ''
     set -eu
 
@@ -193,6 +204,7 @@ let
     exec ${codexRole}/bin/codex-role pm "$@"
   '';
 
+  # Obsidian vaultへ移動してから定型チームを起動する短縮コマンド。
   vaultPmArchitectIosStack = pkgs.writeShellScriptBin "hvault" ''
     set -eu
 
@@ -207,6 +219,7 @@ let
     HERDR_TEAM_SUFFIX="vault-''${HERDR_TEAM_SUFFIX:-$$}" exec ${pmArchitectIosStack}/bin/hpm-harch-hios "$@"
   '';
 
+  # よく使うロールだけ、さらに短いhpm・hiosなどのaliasを生成する。
   shortHerdrRoleCommands =
     lib.mapAttrsToList
       (
@@ -226,6 +239,7 @@ let
         hreview = "reviewer";
       };
 
+  # Codex用integrationを導入し、現在のintegration状態を表示する。
   herdrBootstrapCodex = pkgs.writeShellScriptBin "herdr-bootstrap-codex" ''
     set -eu
 
@@ -239,6 +253,7 @@ let
   '';
 in
 {
+  # 小画面のNix-on-Droidなど、環境側からHerdrの自動起動を止められるoption。
   options.dotfiles.herdr.autoStart = lib.mkOption {
     type = lib.types.bool;
     default = true;
@@ -246,6 +261,7 @@ in
   };
 
   config = {
+    # Herdr本体、共通ランチャー、ロール別に生成した全コマンドをユーザーへ配布する。
     home.packages = [
       herdrPackage
       herdrBootstrapCodex
@@ -258,6 +274,7 @@ in
     ++ herdrRoleCommands
     ++ shortHerdrRoleCommands;
 
+    # 生成したロールpromptとHerdr本体の設定をXDG config配下へ配置する。
     xdg.configFile = rolePromptFiles // {
       "herdr/config.toml".source = ./config.toml;
     };
@@ -277,6 +294,7 @@ in
       };
 
       initContent = lib.mkOrder 2100 ''
+        # 任意の名前とコマンドでHerdr agentを追加する汎用関数。
         hagent() {
           if [[ $# -lt 2 ]]; then
             echo "usage: hagent <name> <command> [args...]" >&2
@@ -289,7 +307,7 @@ in
         }
 
         ${lib.optionalString config.dotfiles.herdr.autoStart ''
-          # Herdr panes set HERDR_ENV, so only the top-level terminal starts the UI.
+          # Herdrペイン内ではHERDR_ENVが設定されるため、最上位の対話shellだけUIを起動する。
           if [[ -o interactive && -t 0 && -t 1 && ''${SHLVL:-1} -eq 1 && -z "''${HERDR_ENV:-}" ]]; then
             command herdr
           fi

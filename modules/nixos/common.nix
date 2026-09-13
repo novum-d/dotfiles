@@ -5,8 +5,10 @@ let
   locale = "ja_JP.UTF-8";
 in
 {
+  # 開発端末として外部から接続するサービスがあるため、個別サービス側でポートを管理する。
   networking.firewall.enable = false;
 
+  # 実機とWSLで同じタイムゾーン・日本語ロケールを使う。
   time.timeZone = "Asia/Tokyo";
 
   i18n.defaultLocale = locale;
@@ -22,6 +24,7 @@ in
     LC_TIME = locale;
   };
 
+  # GUIとターミナルの双方で日本語・絵文字・Nerd Fontを同じ優先順で解決する。
   fonts = {
     fontDir.enable = true;
 
@@ -51,6 +54,7 @@ in
         emoji = [ "Noto Color Emoji" ];
       };
       localConf = ''
+        <!-- Java/Swingアプリが要求する論理フォントもNoto/JetBrainsへ対応付ける。 -->
         <fontconfig>
           <alias>
             <family>JetBrains Mono</family>
@@ -105,6 +109,7 @@ in
     };
   };
 
+  # Flakeから渡された共通ユーザーを作成し、管理者操作とDockerの利用を許可する。
   users.users."${username}" = {
     isNormalUser = true;
     description = username;
@@ -115,6 +120,7 @@ in
     shell = pkgs.zsh;
   };
 
+  # 同じユーザーへNixOS系共通のHome Manager設定を接続する。
   home-manager.users."${username}" =
     { ... }:
     {
@@ -127,6 +133,7 @@ in
 
   programs.zsh.enable = true;
 
+  # Flake、定期GC、Store最適化をNixOSとWSLで同じ設定にする。
   nixpkgs.config.allowUnfree = true;
   nix = {
     settings = {
@@ -147,12 +154,14 @@ in
     };
   };
 
+  # 開発用コンテナを一般ユーザーからrootlessでも利用できるようにする。
   virtualisation.docker.enable = true;
   virtualisation.docker.rootless = {
     enable = true;
     setSocketVariable = true;
   };
 
+  # OSの復旧・ビルド・ネットワーク操作に必要な基礎パッケージだけをシステムへ置く。
   environment.systemPackages = with pkgs; [
     git
     glibc.bin
@@ -169,6 +178,7 @@ in
     PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
   };
 
+  # 鍵認証だけを許可し、rootログインとパスワード認証を無効にする。
   services.openssh = {
     enable = true;
     settings = {

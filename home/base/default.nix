@@ -6,6 +6,7 @@
   ...
 }:
 {
+  # manページ生成を省き、Home Managerのactivationを軽くする。
   manual.manpages.enable = false;
 
   # OS固有optionを持つmoduleはhome/darwinまたはhome/nixosからimportする。
@@ -24,6 +25,8 @@
     ./programs/github-copilot
     ./programs/herdr
   ];
+
+  # OSに依存しないCLIを全環境へ配布し、Linux限定ツールだけ条件付きで追加する。
   home = {
     packages =
       (with pkgs; [
@@ -98,6 +101,7 @@
         unstable.gh
         unstable.terraform
       ])
+      # Wayland/X11のクリップボードCLIはLinuxでだけ評価する。
       ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux (
         with pkgs;
         [
@@ -109,12 +113,15 @@
 
     enableNixpkgsReleaseCheck = false;
 
+    # 既存環境との互換性を保つHome Managerの状態バージョン。
     stateVersion = "26.05";
 
+    # Graphvizを利用するツールへ、Nix Store内のdot実体を明示する。
     sessionVariables = {
       GRAPHVIZ_DOT = "${pkgs.graphviz}/bin/dot";
     };
   };
 
+  # Home Manager自身を世代管理の対象として有効にする。
   programs.home-manager.enable = true;
 }

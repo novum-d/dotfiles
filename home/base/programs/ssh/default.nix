@@ -8,9 +8,11 @@
 }:
 
 let
+  # Home Managerのversion差に応じて、新旧どちらのSSH設定APIを使うか判定する。
   hasSettingsOption = lib.hasAttrByPath [ "programs" "ssh" "settings" ] options;
 in
 {
+  # 初回activationで鍵がなければ生成し、既存鍵も含めて権限を毎回補正する。
   home.activation.generateSshKey = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     ssh_dir="${config.home.homeDirectory}/.ssh"
     key_file="$ssh_dir/id_ed25519"
@@ -35,6 +37,7 @@ in
     enableDefaultConfig = false;
   }
   // (
+    # 新しいHome Managerではsettings、古いversionではmatchBlocksへ同じ内容を設定する。
     if hasSettingsOption then
       {
         settings = {

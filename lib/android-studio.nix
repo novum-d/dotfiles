@@ -15,14 +15,19 @@ let
     SDL_IM_MODULE = "fcitx";
     XMODIFIERS = "@im=fcitx";
   };
+
+  # 上の属性セットを起動スクリプトで使えるexport文へ変換する。
   inputMethodExports = lib.concatStringsSep "\n" (
     lib.mapAttrsToList (
       name: value: "export ${name}=${lib.escapeShellArg value}"
     ) inputMethodEnvironment
   );
+
+  # Android Studioが参照するユーザー設定内のVM optionファイル。
   vmOptionsConfigPath = "Google/AndroidStudio2026.1.1/studio64.vmoptions";
 in
 {
+  # Home Manager側のsessionVariablesにも同じ入力メソッド設定を再利用させる。
   inherit inputMethodEnvironment;
 
   vmOptionsRelativePath = ".config/${vmOptionsConfigPath}";
@@ -42,6 +47,7 @@ in
       ${inputMethodExports}
       export STUDIO_VM_OPTIONS="''${XDG_CONFIG_HOME:-$HOME/.config}/${vmOptionsConfigPath}"
 
+      # 端末を閉じてもGUIを終了させないよう、最初の起動だけ別セッションへ切り離す。
       if [ -z "''${_DOTFILES_STUDIO_DETACHED-}" ]; then
         export _DOTFILES_STUDIO_DETACHED=1
         exec ${pkgs.util-linux}/bin/setsid --fork "$0" "$@" </dev/null >/dev/null 2>&1
@@ -54,12 +60,14 @@ in
         fi
       ''}
 
+      # D-Busセッションがない端末から起動した場合は、一度だけセッションを作り直す。
       if [ -z "''${DBUS_SESSION_BUS_ADDRESS-}" ] && command -v dbus-run-session >/dev/null 2>&1; then
         exec dbus-run-session -- "$0" "$@"
       fi
 
       unset _DOTFILES_STUDIO_DETACHED
 
+      # GUIアプリが現在のdisplayと入力メソッドを参照できるようD-Busへ反映する。
       if command -v dbus-update-activation-environment >/dev/null 2>&1; then
         dbus-update-activation-environment --systemd \
           DISPLAY WAYLAND_DISPLAY XAUTHORITY \
@@ -67,6 +75,7 @@ in
           >/dev/null 2>&1 || true
       fi
 
+      # X11 displayがある場合だけfcitx5を起動し、Mozcを有効にする。
       if command -v fcitx5 >/dev/null 2>&1 && [ -n "''${DISPLAY-}" ]; then
         fcitx5 --disable waylandim -d --replace >/dev/null 2>&1 || true
         fcitx5-remote -s mozc >/dev/null 2>&1 || true

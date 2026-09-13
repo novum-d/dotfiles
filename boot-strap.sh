@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
-# All-platform bootstrap. It installs prerequisites, but never activates a
-# system configuration. The activation command remains explicit in docs/.
+# 全プラットフォーム共通の導入スクリプト。
+# 前提CLIだけを導入し、システム構成の反映はdocs/の手順から明示的に実行する。
 set -euo pipefail
 
 script_name="$(basename "$0")"
 script_dir="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)"
 
+# エラーと進捗へ常にスクリプト名を付け、どの処理の出力か分かるようにする。
 die() {
   printf '%s: %s\n' "$script_name" "$1" >&2
   exit 1
@@ -20,6 +21,7 @@ has_command() {
   command -v "$1" >/dev/null 2>&1
 }
 
+# Nix導入直後でも後続処理がnixコマンドを見つけられるよう、既知のprofileをPATHへ追加する。
 refresh_path() {
   local profile_dir
 
@@ -38,6 +40,7 @@ refresh_path() {
   export PATH
 }
 
+# kernel、WSLの識別情報、Nix-on-Droidの環境変数から実行環境を判定する。
 detect_platform() {
   local kernel proc_version
   kernel="$(uname -s)"
@@ -73,6 +76,7 @@ detect_platform() {
   esac
 }
 
+# Linuxのシステムパッケージ導入だけ、rootまたはsudo経由で実行する。
 run_as_root() {
   if [ "$(id -u)" -eq 0 ]; then
     "$@"
@@ -83,6 +87,7 @@ run_as_root() {
   fi
 }
 
+# Nix導入に必要なcurl・Git・証明書・xzだけを、利用可能なパッケージマネージャーで導入する。
 install_linux_tools() {
   local package_manager
   package_manager=""
@@ -117,6 +122,7 @@ install_linux_tools() {
   esac
 }
 
+# NixOSとNix-on-DroidではOS側のNixを尊重し、それ以外だけDeterminate Nixを導入する。
 install_nix() {
   local platform="$1"
 
@@ -140,6 +146,7 @@ install_nix() {
   has_command nix || die "Nix installation finished, but nix is not on PATH; open a new shell and run this script again"
 }
 
+# Home Managerを反映する前でも検証できるよう、不足している基礎CLIをNix profileへ追加する。
 install_profile_tools() {
   local platform="$1" command_name package_name nixpkgs_ref missing_packages=()
   local -a expected_tools=(
@@ -160,7 +167,7 @@ install_profile_tools() {
 
   nixpkgs_ref="nixpkgs#"
   if [ "$platform" = "Nix-on-Droid" ]; then
-    # Match the pinned nixpkgs used by this repository's Droid configuration.
+    # リポジトリのNix-on-Droid構成と同じ固定revisionからCLIを導入する。
     nixpkgs_ref="github:NixOS/nixpkgs/88d3861acdd3d2f0e361767018218e51810df8a1#"
   fi
 
@@ -182,6 +189,7 @@ install_profile_tools() {
 platform="$(detect_platform)"
 info "bootstrapping ${platform}"
 
+# すでに導入済みのNixも含め、以降の確認前にPATHを正規化する。
 refresh_path
 
 if [ ! -f "$script_dir/flake.nix" ]; then
@@ -194,6 +202,7 @@ if [ "$platform" = "macOS" ] && ! xcode-select -p >/dev/null 2>&1; then
   die "finish the Xcode Command Line Tools installation, then run this script again"
 fi
 
+# 汎用LinuxとWSLでは、Nixインストーラーの前提CLIがない場合だけOS側から補う。
 if [ "$platform" = "Linux" ] || [ "$platform" = "WSL" ]; then
   if ! has_command curl || ! has_command git; then
     install_linux_tools
@@ -208,6 +217,7 @@ for required_command in nix git curl; do
   has_command "$required_command" || die "${required_command} is still unavailable after installation"
 done
 
+# このスクリプトはactivationせず、環境別の次の確認先だけを案内する。
 info "bootstrap complete; installed prerequisites are ready"
 case "$platform" in
   macOS)

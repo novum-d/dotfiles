@@ -7,6 +7,7 @@
 }:
 
 let
+  # macOSでXDGを無効にした場合だけ、Lazygit固有の標準パスを使う。
   lazygitConfigFile =
     if pkgs.stdenv.hostPlatform.isDarwin && !config.xdg.enable then
       "${config.home.homeDirectory}/Library/Application Support/lazygit/config.yml"
@@ -14,9 +15,10 @@ let
       "${config.xdg.configHome}/lazygit/config.yml";
   localGitConfigFile = "${config.home.homeDirectory}/.gitconfig.local";
 
-  # Configure a self-managed GitLab instance in ~/.gitconfig.local with:
+  # 自前のGitLabを利用する場合は、Git管理外の~/.gitconfig.localへ次のように記述する。
   # [lazygit]
   #   gitlabHost = gitlab.example.com
+  # 値がある場合だけ一時設定を生成し、通常のLazygit設定へ重ねて起動する。
   lazygit = pkgs.writeShellScriptBin "lazygit" ''
     gitlab_host="$(${pkgs.git}/bin/git config --file "${localGitConfigFile}" --get lazygit.gitlabHost 2>/dev/null || true)"
 
@@ -53,6 +55,7 @@ in
     package = lazygit;
 
     settings = {
+      # 表示密度と差分の見やすさを優先したTUIレイアウト。
       gui = {
         nerdFontsVersion = "3";
         sidePanelWidth = 0.15;
@@ -66,6 +69,7 @@ in
         skipStashWarning = true;
       };
 
+      # WSL、macOS、Wayland、X11の順で利用可能なクリップボードへコピーする。
       os.copyToClipboardCmd = ''
         printf %s {{text}} | sh -c 'if command -v clip.exe >/dev/null 2>&1 && command -v iconv >/dev/null 2>&1; then iconv -f UTF-8 -t UTF-16LE | clip.exe; elif command -v pbcopy >/dev/null 2>&1; then pbcopy; elif command -v wl-copy >/dev/null 2>&1; then wl-copy; elif command -v xclip >/dev/null 2>&1; then xclip -selection clipboard; else cat >/dev/null; fi'
       '';
@@ -85,10 +89,12 @@ in
         ];
       };
 
+      # パッケージ更新はNixへ一元化し、Lazygit自身の更新処理を止める。
       update = {
         method = "never";
       };
 
+      # Gitmoji付きcommitと、選択ファイルのblame表示を追加する。
       customCommands = [
         {
           key = "C";

@@ -3,14 +3,15 @@
 {
   programs.zsh = {
     enable = true;
-    # Run this after Home Manager's mise activation so the command-not-found
-    # bridge wraps mise's handler instead of being overwritten by it.
+    # Home Managerのmise初期化後に実行し、command-not-foundの処理を上書きされないようにする。
     initContent = lib.mkOrder 2000 ''
+      # miseのshimを優先し、利用可能なJavaからJAVA_HOMEを補完する。
       export PATH="$HOME/.local/share/mise/shims:$PATH"
       if [[ -z "$JAVA_HOME" ]] && command -v mise >/dev/null 2>&1; then
         export JAVA_HOME="$(mise where java 2>/dev/null)"
       fi
 
+      # macOS、WSL、Linuxで同じopen関数を使い、環境ごとの既定アプリを呼び出す。
       function open() {
         if (( $+commands[wsl-open] )); then
           command wsl-open "$@"
@@ -28,14 +29,13 @@
         export PATH="$HOME/Library/Application Support/JetBrains/Toolbox/scripts:$PATH"
       fi
 
-      # zoxide
+      # zoxideが利用できる場合だけ、ディレクトリ移動履歴をzshへ統合する。
       if command -v zoxide >/dev/null 2>&1; then
         eval "$(zoxide init zsh)"
       fi
 
-      # mise does not currently map all missing binaries (for example java,
-      # python3, and mix) through hook-not-found. Bridge the common runtime entrypoints
-      # to their configured mise tools before falling back to zsh's default.
+      # miseがhook-not-foundへ対応付けないjava、python3、mixなども、
+      # 未導入なら対応するmiseランタイムを導入してから再実行する。
       if [[ -z "$_dotfiles_cmd_not_found_bridge" ]]; then
         _dotfiles_cmd_not_found_bridge=1
         if [[ -n "$(declare -f command_not_found_handler)" ]]; then
@@ -87,7 +87,7 @@
         return 127
       }
 
-      # ghq + fzf
+      # ghqのリポジトリ一覧をfzfで選び、選択先へ移動するZLE widget。
       function ghq_fzf_repo() {
         local select
         select=$(ghq list --full-path | fzf --reverse --height=100%)
@@ -100,6 +100,8 @@
       zle -N ghq_fzf_repo
       bindkey '^G' ghq_fzf_repo
     '';
+
+    # 補完、候補表示、syntax highlightをHome Managerの機能で有効にする。
     enableCompletion = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
@@ -111,6 +113,7 @@
       ];
     };
     plugins = [
+      # prompt本体と、このリポジトリで管理する設定を別pluginとして読み込む。
       {
         name = "powerlevel10k";
         src = pkgs.zsh-powerlevel10k;
@@ -122,6 +125,8 @@
         file = "p10k.zsh";
       }
     ];
+
+    # 履歴は重複を除き、破壊的になりやすいコマンドを保存対象から外す。
     history = {
       size = 10000;
       ignoreAllDups = true;
@@ -132,6 +137,8 @@
         "cp *"
       ];
     };
+
+    # `u`だけは評価中のプラットフォームに対応するrebuildコマンドへ切り替える。
     shellAliases = {
       lg = "lazygit";
       ll = "ls -al";

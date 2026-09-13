@@ -11,6 +11,7 @@
     defaultEditor = true;
     withRuby = true;
     withPython3 = true;
+    # WSLだけMarkdown LSPとpreview用Node.jsをNixから明示的に追加する。
     extraPackages =
       with pkgs;
       [ git ]
@@ -20,6 +21,7 @@
       ];
     initLua = ''
       ${lib.optionalString isWsl ''
+        -- WSLではPowerShellを経由し、WindowsとNeovimのclipboardを共有する。
         vim.g.clipboard = {
           name = "WslClipboard",
           copy = {
@@ -34,6 +36,7 @@
         }
       ''}
 
+      -- Snacks terminalで右側に常駐させるCodexペインの共通設定。
       local codex_panel_command = { "codex" }
 
       local function codex_panel_opts()
@@ -67,7 +70,7 @@
         desc = "Toggle Codex right panel",
       })
 
-      -- Bootstrap lazy.nvim
+      -- lazy.nvimが未導入ならstable branchを取得し、runtime pathへ追加する。
       local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
       if not vim.loop.fs_stat(lazypath) then
         vim.fn.system({
@@ -78,6 +81,7 @@
       end
       vim.opt.rtp:prepend(lazypath)
 
+      -- LazyVim本体、言語別機能、AI補助、session復元をまとめて構成する。
       require("lazy").setup({
         spec = {
           { "ellisonleao/gruvbox.nvim" },
@@ -106,6 +110,7 @@
           { import = "lazyvim.plugins.extras.ai.copilot" },
           { import = "lazyvim.plugins.extras.ai.copilot-chat" },
           ${lib.optionalString isWsl ''
+            -- WSLではNixが導入したmarksmanとWindows側browserを利用する。
             {
               "neovim/nvim-lspconfig",
               opts = {
@@ -153,7 +158,7 @@
             event = "VimEnter",
             opts = {},
             init = function()
-              -- Terminal jobs are restarted explicitly after restoring the layout.
+              -- レイアウト復元後にterminal jobを明示的に再起動するため、sessionへ保存しない。
               vim.opt.sessionoptions:remove("terminal")
             end,
             config = function(_, opts)
@@ -209,6 +214,7 @@
         },
       })
 
+      -- Rust診断、insert modeの短縮key、日英spell checkの表示を調整する。
       vim.g.lazyvim_rust_diagnostics = "rust-analyzer"
       vim.api.nvim_set_keymap("i", "jj", "<esc>", { noremap = true, silent = true })
       vim.opt.spelllang = { "en", "cjk" }

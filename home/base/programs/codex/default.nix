@@ -10,13 +10,13 @@
 }:
 
 let
+  # モデル選択の正本はconfig/default.nixに置き、ラッパーと設定で同じ値を使う。
   primaryModel = codexModels.preferred.model;
   primaryReasoningEffort = codexModels.preferred.reasoningEffort;
   fallbackModel = codexModels.fallback.model;
   fallbackReasoningEffort = codexModels.fallback.reasoningEffort;
 
-  # nixpkgs-unstable can lag behind Codex's rapid release cadence. Keep the
-  # package definition from nixpkgs and override only until it catches up.
+  # nixpkgs-unstableがCodexの更新へ追いつくまでは、パッケージ定義のversionとsourceだけを上書きする。
   codexMinimumVersion = "0.153.1";
   codexPackage =
     if lib.versionAtLeast unstable.codex.version codexMinimumVersion then
@@ -55,6 +55,8 @@ let
     }) trustedRepositoryNames
   );
 
+  # Nix-on-DroidのPRootが扱えないTCGETS2を避け、従来のTCGETSでisattyを判定する共有ライブラリ。
+  # constructorで元のLD_PRELOADを復元し、Codexの子プロセスへ回避策を漏らさない。
   legacyIsatty = pkgs.runCommandCC "codex-legacy-isatty" { } ''
     mkdir -p "$out/lib"
     "$CC" \
@@ -97,6 +99,7 @@ let
       -o "$out/lib/libcodex-legacy-isatty.so"
   '';
 
+  # Nix-on-Droidだけ互換ライブラリと実行時CLIを追加してCodex本体を起動する。
   codexForNixOnDroid = pkgs.writeShellScriptBin "codex" ''
     set -eu
 
@@ -115,9 +118,10 @@ let
 
   codexBasePackage = if isNixOnDroid then codexForNixOnDroid else codexPackage;
 
+  # 利用可能なモデル一覧を確認し、preferredが使えない場合だけfallbackへ切り替える。
   codexWithFallback = pkgs.writeShellApplication {
     name = "codex";
-    # Home Manager uses the package version to select config.toml instead of legacy config.yaml.
+    # Home Managerが旧config.yamlではなくconfig.tomlを選べるようversionを引き継ぐ。
     passthru.version = codexPackage.version;
     runtimeInputs = [ pkgs.jq ];
     text = ''
@@ -162,7 +166,7 @@ let
   };
 in
 {
-  # Rule syntax is easier to review and reuse when kept in native .rules files.
+  # Codexのruleは専用形式のファイルに分け、個別にレビュー・再利用できるようにする。
   home.file = {
     ".codex/rules/development.rules".source = ./rules/development.rules;
     ".codex/rules/git.rules".source = ./rules/git.rules;
@@ -171,7 +175,7 @@ in
   };
 
   home.packages = with pkgs; [
-    # Baseline tools Codex uses for inspection and mechanical edits.
+    # Codexがファイル調査や機械的編集で利用する基礎CLI。
     bzip2
     file
     gawk
@@ -185,10 +189,10 @@ in
 
   programs.codex = {
     enable = true;
-    # glibc 2.42 uses TCGETS2 for isatty(), but the PRoot bundled with
-    # Nix-on-Droid 24.05 does not emulate it. Use the legacy TCGETS path whenever Codex starts on Nix-on-Droid.
+    # Nix-on-Droidでは上記のTCGETS互換ラッパーを、それ以外では通常のCodexを使う。
     package = codexWithFallback;
     settings = {
+      # 通常はsandbox内で実行し、権限拡張が必要な操作はCodex内の自動レビューへ送る。
       approval_policy = "on-request";
       approvals_reviewer = "auto_review";
       # Nixで更新を一元管理しているため、CLI自身の更新通知を止める。
@@ -206,6 +210,8 @@ in
           trust_level = "trusted";
         };
       };
+
+      # リポジトリを含むホーム配下へ書き込みを許可し、sandbox内のnetworkも利用可能にする。
       sandbox_mode = "workspace-write";
       sandbox_workspace_write = {
         network_access = true;
