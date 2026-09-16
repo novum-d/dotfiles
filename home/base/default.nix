@@ -16,7 +16,6 @@
     ./programs/ssh
     ./programs/git
     ./programs/lazyvim
-    ./programs/continue
     ./programs/jetbrains-toolbox
     ./programs/lazygit
     ./programs/android
