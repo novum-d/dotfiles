@@ -37,13 +37,12 @@ let
         };
       });
 
-  # Codexのproject trustは親ディレクトリから継承されず、リポジトリルートの
-  # 完全一致で判定される。Home Manager管理のconfig.tomlは読み取り専用なので、
-  # 利用するリポジトリをここで宣言し、TUIによる書き戻しを発生させない。
+  # CLI以外のCodexクライアントでも、従来の明示的な信頼設定を維持する。
   trustedRepositoryNames = [
     "TvApp"
     "android-platform-research"
     "base"
+    "droid-mcp"
     "dotfiles"
     "obsidian"
     "zunda-bot-rs"
@@ -158,9 +157,44 @@ let
       export CODEX_CONFIGURED_MODEL="$selected_model"
       export CODEX_CONFIGURED_REASONING_EFFORT="$selected_reasoning_effort"
 
+      # Codexは親ディレクトリのtrustを継承しない。起動対象が~/repos配下の
+      # Gitリポジトリなら、そのルートだけをこの起動中に信頼する。
+      codex_workdir="$PWD"
+      expect_cd=false
+      for arg in "$@"; do
+        if [ "$expect_cd" = true ]; then
+          codex_workdir="$arg"
+          expect_cd=false
+          continue
+        fi
+        case "$arg" in
+          -C|--cd) expect_cd=true ;;
+          --cd=*) codex_workdir="''${arg#--cd=}" ;;
+          --) break ;;
+        esac
+      done
+
+      codex_trust_args=()
+      repos_dir="${config.home.homeDirectory}/repos"
+      if [ -d "$repos_dir" ] && [ -d "$codex_workdir" ]; then
+        repos_dir="$(cd "$repos_dir" && pwd -P)"
+        codex_workdir="$(cd "$codex_workdir" && pwd -P)"
+        repo_root="$(${pkgs.git}/bin/git -C "$codex_workdir" rev-parse --show-toplevel 2>/dev/null)" || repo_root=""
+        if [ -n "$repo_root" ]; then
+          repo_root="$(cd "$repo_root" && pwd -P)"
+          case "$repo_root" in
+            "$repos_dir"/*)
+              repo_key="$(jq -Rn --arg path "$repo_root" '$path')"
+              codex_trust_args=(-c "projects={ $repo_key = { trust_level = \"trusted\" } }")
+              ;;
+          esac
+        fi
+      fi
+
       exec ${codexBasePackage}/bin/codex \
         -m "$selected_model" \
         -c "model_reasoning_effort=\"$selected_reasoning_effort\"" \
+        "''${codex_trust_args[@]}" \
         "$@"
     '';
   };
@@ -172,6 +206,15 @@ in
     ".codex/rules/git.rules".source = ./rules/git.rules;
     ".codex/rules/information-gathering.rules".source = ./rules/information-gathering.rules;
     ".codex/rules/nix.rules".source = ./rules/nix.rules;
+
+    # ユーザースコープのSkillとして、作業リポジトリにかかわらず利用可能にする。
+    ".agents/skills/natural-japanese/SKILL.md".source = ./skills/natural-japanese/SKILL.md;
+    ".agents/skills/plantuml/SKILL.md".source = ./skills/plantuml/SKILL.md;
+    ".agents/skills/slide-design".source = ./skills/slide-design;
+
+    # 自動収集した一般用語をdotfilesの正本へ反映できるよう、辞書だけを書き込み可能にする。
+    ".agents/skills/natural-japanese/references/terminology.md".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/repos/dotfiles/home/base/programs/codex/skills/natural-japanese/references/terminology.md";
   };
 
   home.packages = with pkgs; [

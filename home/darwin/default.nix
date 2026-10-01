@@ -2,10 +2,11 @@
 { ... }:
 
 {
-  # 全環境共通設定に、macOS専用のKarabiner設定を追加する。
+  # 全環境共通設定に、macOS専用のアプリ設定を追加する。
   imports = [
     ../base
     ./programs/karabiner
+    ./programs/zed
   ];
 
   # macOS側でも同じObsidian除外ルールを利用する。

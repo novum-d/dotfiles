@@ -127,6 +127,13 @@ u
 
 `u` は `sudo darwin-rebuild switch --flake .` を実行するため、別のディレクトリから使用する場合は明示的にFlakeのパスとホスト名を指定してください。
 
+通常の設定適用ではHomebrewの`update`とインストール済みformula/caskの一括`upgrade`を実行しません。Homebrewパッケージを明示的に更新したい場合だけ、次を実行してください。
+
+```shell
+brew update
+brew upgrade
+```
+
 ## 9. 動作を確認する
 
 ```shell

@@ -93,6 +93,7 @@ Codexの既定sandboxは `workspace-write` を維持し、Home Managerのhome di
 
 ### CodexとHerdr
 
+- Codex CLIは起動時に `~/repos` 配下のGitリポジトリルートを信頼する。新しいリポジトリを固定の信頼一覧へ追加する必要はない。`~/repos` 外は自動信頼しない。
 - CodexとHerdrロールの既定モデルは `config/default.nix` の `codexModels` を正本とし、`gpt-5.6-sol`、reasoning effortは `high` とする。
 - 利用可能モデル一覧に既定モデルがない場合だけ `gpt-5.5`、`high` へフォールバックする。
 - モデル一覧を取得できない場合は、ネットワーク障害などをモデル未提供と誤認せず、既定モデルで起動を試みる。

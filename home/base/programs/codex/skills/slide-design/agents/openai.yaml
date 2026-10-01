@@ -1,0 +1,4 @@
+interface:
+  display_name: "Slide Design"
+  short_description: "Create and review clear, consistent presentation slides"
+  default_prompt: "Create or revise slides using strong visual hierarchy, the four design principles, safe image fitting, and render-based validation."

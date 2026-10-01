@@ -87,8 +87,9 @@ in
   homebrew = {
     enable = true;
     onActivation = {
-      autoUpdate = true;
-      upgrade = true;
+      # 通常のdarwin-rebuildではHomebrewの更新と一括アップグレードを行わない。
+      autoUpdate = false;
+      upgrade = false;
       # 宣言から外したformula/caskも次回activationで削除する。
       cleanup = "zap";
     };
