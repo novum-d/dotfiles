@@ -1,5 +1,6 @@
 # Android SDKとCLIの共通設定
 {
+  isWsl ? false,
   lib,
   pkgs,
   unstable,
@@ -13,10 +14,12 @@ let
 in
 {
   home = {
-    # adbは全環境へ、Android SDK CLIは対応プラットフォームだけへ追加する。
+    # adbは全環境へ、Cordovaが利用するGradleはWSLだけへ追加する。
     packages = [
       pkgs.android-tools
     ]
+    ++ lib.optional isWsl pkgs.gradle
+    # Android SDK CLIは対応プラットフォームだけへ追加する。
     ++ lib.optional (lib.meta.availableOn pkgs.stdenv.hostPlatform unstable.android-cli) unstable.android-cli;
 
     # Android関連ツールが同じSDKを参照できるよう環境変数をそろえる。

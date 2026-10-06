@@ -80,11 +80,14 @@ Start-Process -FilePath 'C:\Program Files\usbipd-win\usbipd.exe' -ArgumentList '
 - `18d1` は Google/Pixel の USB vendor ID。別メーカーの場合は `usbipd list` や `udevadm info` で vendor ID を確認する
 
 Home Manager 側では、Nix の `android-tools` を Android SDK 付属の `platform-tools` より先に置く。
+Cordova が Gradle Wrapper を生成できるよう、WSL では Nix の `gradle` も PATH に追加する。
 
 ```nix
 { lib, pkgs, ... }:
 
 {
+  home.packages = [ pkgs.gradle ];
+
   home.sessionPath = lib.mkBefore [
     "${pkgs.android-tools}/bin"
     "$HOME/Android/Sdk/cmdline-tools/latest/bin"
