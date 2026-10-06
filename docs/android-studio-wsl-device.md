@@ -86,7 +86,7 @@ Cordova が Gradle Wrapper を生成できるよう、WSL では Nix の `gradle
 { lib, pkgs, ... }:
 
 {
-  home.packages = [ pkgs.gradle ];
+  home.packages = [ pkgs.gradle_9 ];
 
   home.sessionPath = lib.mkBefore [
     "${pkgs.android-tools}/bin"

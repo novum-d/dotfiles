@@ -18,7 +18,7 @@ in
     packages = [
       pkgs.android-tools
     ]
-    ++ lib.optional isWsl pkgs.gradle
+    ++ lib.optional isWsl pkgs.gradle_9
     # Android SDK CLIは対応プラットフォームだけへ追加する。
     ++ lib.optional (lib.meta.availableOn pkgs.stdenv.hostPlatform unstable.android-cli) unstable.android-cli;
 
