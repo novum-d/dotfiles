@@ -28,7 +28,7 @@ in
         erlang = "latest";
         elixir = "latest";
         python = "3";
-        node = "latest";
+        node = "26.10.0";
       };
 
       # PythonビルドがNix Store内のheader・library・pkg-configを見つけられるようにする。
@@ -42,6 +42,8 @@ in
 
       # 未導入のランタイムを初回実行時に自動導入する。
       settings = {
+        # Node.jsなどはソースビルドを強制せず、利用可能なprecompiled版を優先する。
+        all_compile = false;
         auto_install = true;
         exec_auto_install = true;
         not_found_auto_install = true;
