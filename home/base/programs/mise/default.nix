@@ -24,11 +24,11 @@ in
       # 各言語で利用する既定系列。実際のversion解決と導入はmiseへ任せる。
       tools = {
         rust = "stable";
-        java = "21";
+        java = "17";
         erlang = "latest";
         elixir = "latest";
         python = "3";
-        node = "lts";
+        node = "latest";
       };
 
       # PythonビルドがNix Store内のheader・library・pkg-configを見つけられるようにする。
@@ -57,6 +57,6 @@ in
 
   # Javaを利用するビルドツール向けに既定JDKの場所を公開する。
   home.sessionVariables = {
-    JAVA_HOME = "$HOME/.local/share/mise/installs/java/21";
+    JAVA_HOME = "$HOME/.local/share/mise/installs/java/17";
   };
 }
