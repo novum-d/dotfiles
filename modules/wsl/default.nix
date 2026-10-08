@@ -85,13 +85,14 @@ in
   imports = [ ../nixos/common.nix ];
 
   # 右ShiftでMozcを切り替えられる日本語入力環境をWSLgへ提供する。
+  # WSLgのWayland compositorに依存せず、ElectronとJetBrainsの両方をX11/fcitx5へ統一する。
   i18n.inputMethod = {
     enable = true;
     enableGtk2 = true;
     type = "fcitx5";
     fcitx5 = {
       addons = with pkgs; [ fcitx5-mozc ];
-      waylandFrontend = true;
+      waylandFrontend = false;
       settings.globalOptions."Hotkey/TriggerKeys"."0" = "Shift_R";
       settings.inputMethod = {
         "Groups/0" = {
@@ -109,6 +110,26 @@ in
         };
         GroupOrder."0" = "Default";
       };
+    };
+  };
+
+  # WSLにはXDG autostartを処理するdesktop sessionがないため、fcitx5をユーザーサービスとして常駐させる。
+  systemd.user.services.fcitx5-wsl = {
+    description = "Fcitx5 input method for WSLg";
+    wantedBy = [ "default.target" ];
+    after = [ "dbus.socket" ];
+    wants = [ "dbus.socket" ];
+    environment = {
+      DISPLAY = ":0";
+      GTK_IM_MODULE = "fcitx";
+      QT_IM_MODULE = "fcitx";
+      SDL_IM_MODULE = "fcitx";
+      XMODIFIERS = "@im=fcitx";
+    };
+    serviceConfig = {
+      ExecStart = "${fcitx5WithMozc}/bin/fcitx5 --disable waylandim --replace";
+      Restart = "on-failure";
+      RestartSec = 1;
     };
   };
 

@@ -58,6 +58,14 @@ in
         if [ -z "''${DISPLAY-}" ] && [ -S /tmp/.X11-unix/X0 ]; then
           export DISPLAY=:0
         fi
+
+        # WindowsのStart Menuなどから起動しても、常駐fcitx5と同じユーザーD-Busへ接続する。
+        if [ -z "''${DBUS_SESSION_BUS_ADDRESS-}" ]; then
+          runtime_dir="''${XDG_RUNTIME_DIR:-/run/user/$(${pkgs.coreutils}/bin/id -u)}"
+          if [ -S "$runtime_dir/bus" ]; then
+            export DBUS_SESSION_BUS_ADDRESS="unix:path=$runtime_dir/bus"
+          fi
+        fi
       ''}
 
       # D-Busセッションがない端末から起動した場合は、一度だけセッションを作り直す。
@@ -76,8 +84,11 @@ in
       fi
 
       # X11 displayがある場合だけfcitx5を起動し、Mozcを有効にする。
+      # WSLではsystemdユーザーサービスを利用し、既存プロセスを置き換えない。
       if command -v fcitx5 >/dev/null 2>&1 && [ -n "''${DISPLAY-}" ]; then
-        fcitx5 --disable waylandim -d --replace >/dev/null 2>&1 || true
+        if ! fcitx5-remote >/dev/null 2>&1; then
+          fcitx5 --disable waylandim -d >/dev/null 2>&1 || true
+        fi
         fcitx5-remote -s mozc >/dev/null 2>&1 || true
         fcitx5-remote -o >/dev/null 2>&1 || true
       fi

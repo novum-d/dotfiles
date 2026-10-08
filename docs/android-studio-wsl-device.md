@@ -146,6 +146,15 @@ studio .
 
 IME は右 Shift の単独押しで英数入力とMozcを切り替える。右 Shift をほかのキーと組み合わせた場合は、通常のShift修飾キーとして動作する。
 
+WSL構成ではfcitx5をsystemdユーザーサービスとして常駐させ、Android StudioとObsidianはどちらもWSLgのX11経由でfcitx5を使う。動作状態は次で確認できる。
+
+```shell
+systemctl --user status fcitx5-wsl.service
+fcitx5-remote
+```
+
+`fcitx5-remote` は `0` ならfcitx5が未起動、`1` なら英数入力、`2` ならMozcが有効な状態を表す。キー操作を使わずに切り替える場合は `fcitx5-remote -t` を実行する。
+
 Device Manager または Run target に実機が表示されれば完了。
 
 ## Android Studio のバージョン更新時

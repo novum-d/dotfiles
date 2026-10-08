@@ -22,6 +22,27 @@ let
 
   # Home Managerから起動できるAndroid Studioラッパーを生成する。
   studio = studioSupport.mkLauncher "studio";
+
+  # WSLのObsidianをAndroid Studioと同じX11/fcitx5経路で起動する。
+  obsidian =
+    if isWsl then
+      pkgs.symlinkJoin {
+        name = "obsidian-wsl";
+        paths = [ guiPkgs.obsidian ];
+        nativeBuildInputs = [ pkgs.makeWrapper ];
+        postBuild = ''
+          wrapProgram "$out/bin/obsidian" \
+            --set GTK_IM_MODULE fcitx \
+            --set QT_IM_MODULE fcitx \
+            --set SDL_IM_MODULE fcitx \
+            --set XMODIFIERS '@im=fcitx' \
+            --set-default DISPLAY :0 \
+            --run 'export DBUS_SESSION_BUS_ADDRESS="''${DBUS_SESSION_BUS_ADDRESS:-unix:path=''${XDG_RUNTIME_DIR:-/run/user/$UID}/bus}"' \
+            --add-flags '--ozone-platform=x11'
+        '';
+      }
+    else
+      guiPkgs.obsidian;
 in
 {
   # 全環境共通設定を土台に、NixOS・WSL向けのユーザー設定だけを追加する。
@@ -60,6 +81,18 @@ in
 
           [GroupOrder]
           0=Default
+        '';
+      };
+
+      # /etc/xdgより優先される既存ユーザー設定があっても右Shiftを維持する。
+      ".config/fcitx5/config" = lib.mkIf isWsl {
+        force = true;
+        text = ''
+          [Hotkey]
+          EnumerateWithTriggerKeys=True
+
+          [Hotkey/TriggerKeys]
+          0=Shift_R
         '';
       };
 
@@ -121,6 +154,6 @@ in
 
   programs.obsidian = {
     enable = true;
-    package = guiPkgs.obsidian;
+    package = obsidian;
   };
 }
