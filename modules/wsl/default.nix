@@ -93,7 +93,11 @@ in
     fcitx5 = {
       addons = with pkgs; [ fcitx5-mozc ];
       waylandFrontend = false;
-      settings.globalOptions."Hotkey/TriggerKeys"."0" = "Shift_R";
+      settings.globalOptions."Hotkey/TriggerKeys" = {
+        "0" = "Shift_R";
+        "1" = "Control+space";
+        "2" = "Zenkaku_Hankaku";
+      };
       settings.inputMethod = {
         "Groups/0" = {
           Name = "Default";
@@ -127,6 +131,8 @@ in
       XMODIFIERS = "@im=fcitx";
     };
     serviceConfig = {
+      Type = "dbus";
+      BusName = "org.fcitx.Fcitx5";
       ExecStart = "${fcitx5WithMozc}/bin/fcitx5 --disable waylandim --replace";
       Restart = "on-failure";
       RestartSec = 1;

@@ -144,16 +144,18 @@ studio .
 
 起動コマンドは端末から切り離されるため、Android Studio の起動後も同じシェルをそのまま操作できる。
 
-IME は右 Shift の単独押しで英数入力とMozcを切り替える。右 Shift をほかのキーと組み合わせた場合は、通常のShift修飾キーとして動作する。
+IME は右 Shift の単独押し、`Ctrl+Space`、または日本語キーボードの半角/全角キーで英数入力とMozcを切り替える。右 Shift をほかのキーと組み合わせた場合は、通常のShift修飾キーとして動作する。Windows側のキー処理などで右 Shift が届かない場合は `Ctrl+Space` を使う。
 
-WSL構成ではfcitx5をsystemdユーザーサービスとして常駐させ、Android StudioとObsidianはどちらもWSLgのX11経由でfcitx5を使う。動作状態は次で確認できる。
+WSL構成ではfcitx5をsystemdユーザーサービスとして常駐させ、Android StudioとObsidianの起動時にもサービスのD-Bus登録完了を待つ。どちらもWSLgのX11経由でfcitx5を使い、ObsidianにはGTK入力モジュールの検索パスも明示する。動作状態は次で確認できる。
 
 ```shell
 systemctl --user status fcitx5-wsl.service
 fcitx5-remote
 ```
 
-`fcitx5-remote` は `0` ならfcitx5が未起動、`1` なら英数入力、`2` ならMozcが有効な状態を表す。キー操作を使わずに切り替える場合は `fcitx5-remote -t` を実行する。
+`fcitx5-remote` は `1` なら英数入力、`2` なら入力メソッドが有効な状態を表す。`0` は入力欄にフォーカスがない場合にも返るため、サービス停止とは限らない。キー操作を使わずに切り替える場合は `fcitx5-remote -t` を実行する。
+
+WSLのAndroid Studioでは `-Drecreate.x11.input.method=true` を指定せず、付属JetBrains RuntimeのXIM処理を使う。このオプションを明示しない設定は、[JetBrainsのXIM修正の案内](https://youtrack.jetbrains.com/issue/JBR-2460)に沿っている。
 
 Device Manager または Run target に実機が表示されれば完了。
 

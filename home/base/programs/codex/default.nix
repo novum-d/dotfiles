@@ -16,26 +16,54 @@ let
   fallbackModel = codexModels.fallback.model;
   fallbackReasoningEffort = codexModels.fallback.reasoningEffort;
 
-  # nixpkgs-unstableがCodexの更新へ追いつくまでは、パッケージ定義のversionとsourceだけを上書きする。
-  codexMinimumVersion = "0.153.1";
-  codexPackage =
-    if lib.versionAtLeast unstable.codex.version codexMinimumVersion then
-      unstable.codex
-    else
-      unstable.codex.overrideAttrs (_: rec {
-        version = codexMinimumVersion;
-        src = unstable.fetchFromGitHub {
-          owner = "openai";
-          repo = "codex";
-          tag = "rust-v${version}";
-          hash = "sha256-u7bp0B3MUuPIlk1QUKz267EGedjwMgTaoSNoYI5piLQ=";
-        };
-        cargoDeps = unstable.rustPlatform.fetchCargoVendor {
-          inherit src;
-          sourceRoot = "${src.name}/codex-rs";
-          hash = "sha256-GG6kOXmCdq+bZLU2ul0DIVL8lDuweayvZvXn6+bcUZw=";
-        };
-      });
+  # nixpkgs-unstableがCodexの更新へ追いつくまでは、公式のビルド済みpackage archiveを使う。
+  # archiveにはCodex本体、code-mode host、rg、Linux向けbwrapなどが含まれる。
+  codexMinimumVersion = "0.163.0";
+  codexReleases = {
+    "aarch64-darwin" = {
+      target = "aarch64-apple-darwin";
+      hash = "sha256-sDRPwuQfFeAHEUflhpAIBHuP9L8sSoiXl107rj8QOzQ=";
+    };
+    "aarch64-linux" = {
+      target = "aarch64-unknown-linux-musl";
+      hash = "sha256-nY7PLRnT4YSHeYOQLWyF3kiziI3LcsOCqKDJdYRZJ/s=";
+    };
+    "x86_64-linux" = {
+      target = "x86_64-unknown-linux-musl";
+      hash = "sha256-WCZGxr8FYesN5UD3/IW5EhsAkagmvG6Wgwt/FyISIYI=";
+    };
+  };
+  codexRelease =
+    codexReleases.${pkgs.stdenv.hostPlatform.system}
+      or (throw "Codex ${codexMinimumVersion} is unavailable for ${pkgs.stdenv.hostPlatform.system}");
+  codexPrebuilt = pkgs.stdenvNoCC.mkDerivation {
+    pname = "codex";
+    version = codexMinimumVersion;
+    src = pkgs.fetchurl {
+      url = "https://github.com/openai/codex/releases/download/rust-v${codexMinimumVersion}/codex-package-${codexRelease.target}.tar.gz";
+      inherit (codexRelease) hash;
+    };
+    dontUnpack = true;
+    dontStrip = true;
+    installPhase = ''
+      runHook preInstall
+
+      mkdir -p "$out"
+      tar -xzf "$src" -C "$out"
+      ln -s bin/codex "$out/codex"
+
+      runHook postInstall
+    '';
+    meta = {
+      description = "Lightweight coding agent that runs in your terminal";
+      homepage = "https://github.com/openai/codex";
+      license = lib.licenses.asl20;
+      mainProgram = "codex";
+      platforms = builtins.attrNames codexReleases;
+    };
+  };
+  codexUsesPrebuilt = !lib.versionAtLeast unstable.codex.version codexMinimumVersion;
+  codexPackage = if codexUsesPrebuilt then codexPrebuilt else unstable.codex;
 
   # CLI以外のCodexクライアントでも、従来の明示的な信頼設定を維持する。
   trustedRepositoryNames = [
@@ -98,21 +126,26 @@ let
       -o "$out/lib/libcodex-legacy-isatty.so"
   '';
 
-  # Nix-on-Droidだけ互換ライブラリと実行時CLIを追加してCodex本体を起動する。
+  # 公式prebuiltは実行時CLIを同梱したstatic-pieなので、ソースビルド版を
+  # Nix-on-Droidで使う場合に限って互換ライブラリと実行時CLIを追加する。
   codexForNixOnDroid = pkgs.writeShellScriptBin "codex" ''
     set -eu
 
-    codex_original_ld_preload="''${LD_PRELOAD:-}"
-    export CODEX_NIX_ON_DROID_ORIGINAL_LD_PRELOAD="$codex_original_ld_preload"
-    export LD_PRELOAD="${legacyIsatty}/lib/libcodex-legacy-isatty.so''${codex_original_ld_preload:+:$codex_original_ld_preload}"
-    export PATH="${
-      unstable.lib.makeBinPath [
-        unstable.ripgrep
-        unstable.bubblewrap
-      ]
-    }:$PATH"
+    ${lib.optionalString (!codexUsesPrebuilt) ''
+      codex_original_ld_preload="''${LD_PRELOAD:-}"
+      export CODEX_NIX_ON_DROID_ORIGINAL_LD_PRELOAD="$codex_original_ld_preload"
+      export LD_PRELOAD="${legacyIsatty}/lib/libcodex-legacy-isatty.so''${codex_original_ld_preload:+:$codex_original_ld_preload}"
+    ''}
+    ${lib.optionalString (!codexUsesPrebuilt) ''
+      export PATH="${
+        unstable.lib.makeBinPath [
+          unstable.ripgrep
+          unstable.bubblewrap
+        ]
+      }:$PATH"
+    ''}
 
-    exec ${codexPackage}/bin/.codex-wrapped "$@"
+    exec ${codexPackage}/bin/codex "$@"
   '';
 
   codexBasePackage = if isNixOnDroid then codexForNixOnDroid else codexPackage;

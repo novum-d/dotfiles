@@ -3,7 +3,7 @@
   # Codexのラッパーはpreferredを優先し、利用できない場合だけfallbackを使う。
   codexModels = {
     preferred = {
-      model = "gpt-5.6-sol";
+      model = "gpt-6.1-sol";
       reasoningEffort = "high";
     };
     fallback = {

@@ -35,8 +35,8 @@ in
     -Dawt.toolkit.name=XToolkit
     -Dsun.awt.enableInputMethods=true
     -Djava.awt.im.style=on-the-spot
-    -Drecreate.x11.input.method=true
-  '';
+  ''
+  + lib.optionalString (!isWsl) "-Drecreate.x11.input.method=true\n";
 
   # GUIプロセスをshellから切り離し、必要なD-Busセッションとfcitx5を準備する。
   mkLauncher =
@@ -66,6 +66,9 @@ in
             export DBUS_SESSION_BUS_ADDRESS="unix:path=$runtime_dir/bus"
           fi
         fi
+
+        # XIMへ接続する前に、ユーザーサービスのD-Bus登録完了を待つ。
+        ${pkgs.systemd}/bin/systemctl --user start fcitx5-wsl.service || exit 1
       ''}
 
       # D-Busセッションがない端末から起動した場合は、一度だけセッションを作り直す。
@@ -85,13 +88,15 @@ in
 
       # X11 displayがある場合だけfcitx5を起動し、Mozcを有効にする。
       # WSLではsystemdユーザーサービスを利用し、既存プロセスを置き換えない。
-      if command -v fcitx5 >/dev/null 2>&1 && [ -n "''${DISPLAY-}" ]; then
-        if ! fcitx5-remote >/dev/null 2>&1; then
-          fcitx5 --disable waylandim -d >/dev/null 2>&1 || true
+      ${lib.optionalString (!isWsl) ''
+        if command -v fcitx5 >/dev/null 2>&1 && [ -n "''${DISPLAY-}" ]; then
+          if ! fcitx5-remote >/dev/null 2>&1; then
+            fcitx5 --disable waylandim -d >/dev/null 2>&1 || true
+          fi
+          fcitx5-remote -s mozc >/dev/null 2>&1 || true
+          fcitx5-remote -o >/dev/null 2>&1 || true
         fi
-        fcitx5-remote -s mozc >/dev/null 2>&1 || true
-        fcitx5-remote -o >/dev/null 2>&1 || true
-      fi
+      ''}
 
       # Android StudioはXWayland経由で起動し、Composeの日本語入力を安定させる。
       unset WAYLAND_DISPLAY

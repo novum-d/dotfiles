@@ -37,7 +37,11 @@ let
             --set SDL_IM_MODULE fcitx \
             --set XMODIFIERS '@im=fcitx' \
             --set-default DISPLAY :0 \
+            --unset WAYLAND_DISPLAY \
+            --unset NIXOS_OZONE_WL \
+            --prefix GTK_PATH : '${fcitx5WithMozc}/lib/gtk-3.0:${fcitx5WithMozc}/lib/gtk-4.0' \
             --run 'export DBUS_SESSION_BUS_ADDRESS="''${DBUS_SESSION_BUS_ADDRESS:-unix:path=''${XDG_RUNTIME_DIR:-/run/user/$UID}/bus}"' \
+            --run '${pkgs.systemd}/bin/systemctl --user start fcitx5-wsl.service' \
             --add-flags '--ozone-platform=x11'
         '';
       }
@@ -84,7 +88,7 @@ in
         '';
       };
 
-      # /etc/xdgより優先される既存ユーザー設定があっても右Shiftを維持する。
+      # /etc/xdgより優先されるユーザー設定にもWSLの切替キーを反映する。
       ".config/fcitx5/config" = lib.mkIf isWsl {
         force = true;
         text = ''
@@ -93,6 +97,8 @@ in
 
           [Hotkey/TriggerKeys]
           0=Shift_R
+          1=Control+space
+          2=Zenkaku_Hankaku
         '';
       };
 
