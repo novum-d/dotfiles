@@ -46,12 +46,21 @@ let
     fi
 
     target="$1"
-    if command -v wslpath >/dev/null 2>&1 && [ -e "$target" ]; then
-      target="$(wslpath -w "$target")"
-      exec powershell.exe -NoProfile -Command "& { param([string]\$target) Invoke-Item -LiteralPath \$target }" "$target"
+    action='Start-Process -FilePath'
+    if [ -e "$target" ]; then
+      # NixOS-WSLが配置する実体を使い、PATHから/binが欠けていても変換する。
+      target="$(/bin/wslpath -a -w "$target")"
+      action='Invoke-Item -LiteralPath'
+    elif [[ "$target" == /* || "$target" == ./* || "$target" == ../* ]]; then
+      echo "wsl-open: file not found: $target" >&2
+      exit 1
     fi
 
-    exec powershell.exe -NoProfile -Command "& { param([string]\$target) Start-Process \$target }" "$target"
+    # -Commandの後続引数はPowerShellコードとして再解釈されるため、
+    # パスやURLをBase64で渡して空白・引用符・&・日本語を保持する。
+    encoded_target="$(printf '%s' "$target" | ${pkgs.coreutils}/bin/base64 -w 0)"
+    exec powershell.exe -NoProfile -NonInteractive -Command \
+      "\$ErrorActionPreference = 'Stop'; \$target = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('$encoded_target')); $action \$target"
   '';
 
   # Windows側の実体を明示して、PATH継承に依存せずPowerShellを呼び出す。
