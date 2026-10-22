@@ -143,6 +143,9 @@ studio .
 ```
 
 起動コマンドは端末から切り離されるため、Android Studio の起動後も同じシェルをそのまま操作できる。
+起動ごとの出力は `${XDG_STATE_HOME:-$HOME/.local/state}/android-studio/launcher.*.log` に保存し、端末に保存先を表示する。直近の起動ログは同じディレクトリの `launcher.log` から参照できる。
+
+WSLではIDEの初期ヒープを512 MiB、最大ヒープを4096 MiBとし、Javaのメモリ不足時にはヒープダンプを有効にする。設定の正本は `lib/android-studio.nix` にあり、Home Managerが `~/.config/dotfiles/android-studio/studio64.vmoptions` に配置する。ランチャーが `STUDIO_VM_OPTIONS` でこのファイルを指定するため、IDEのバージョン更新にも追従する。GradleやKotlin daemon、エミュレーターのヒープ設定は別途プロジェクト側で管理する。
 
 IME は右 Shift の単独押し、`Ctrl+Space`、または日本語キーボードの半角/全角キーで英数入力とMozcを切り替える。右 Shift をほかのキーと組み合わせた場合は、通常のShift修飾キーとして動作する。Windows側のキー処理などで右 Shift が届かない場合は `Ctrl+Space` を使う。
 
@@ -161,7 +164,7 @@ Device Manager または Run target に実機が表示されれば完了。
 
 ## Android Studio のバージョン更新時
 
-Android Studio の設定ディレクトリ名が変わった場合は、`AndroidStudio2026.1.1` を新しいディレクトリ名に置き換える。
+WSLのVMオプションはバージョンに依存しないパスから読み込むため、更新時のディレクトリ名変更は不要。通常のNixOSでは、Android Studio の設定ディレクトリ名が変わった場合に `AndroidStudio2026.1.1` を新しいディレクトリ名に置き換える。
 
 変更箇所:
 
@@ -182,6 +185,45 @@ sudo nixos-rebuild switch --flake .#windows-vm
 ```
 
 ## トラブルシュート
+
+### `studio .` がすぐ戻り、画面もエラーも出ない
+
+通常起動では端末から切り離すため、コマンドがすぐ戻っても起動成功とは限らない。以前のランチャーは標準出力・標準エラーを `/dev/null` へ捨てていたため、fcitx5、D-Bus、JVM、IDEロックのエラーも表示されなかった。
+
+まずログを確認する。既に起動済みのIDEに引数を渡しただけの場合、そのIDEの出力は最初の起動時のログに残る。
+
+```shell
+tail -n 100 "${XDG_STATE_HOME:-$HOME/.local/state}/android-studio/launcher.log"
+```
+
+エラーと終了コードを端末で直接確認する場合は、次を使う。この起動では端末がIDEの終了を待つ。
+
+```shell
+studio --foreground .
+```
+
+`VM options not found` ならHome Managerの設定が未反映か、`XDG_CONFIG_HOME` が配置先と異なる。上記の「反映」を実行し、設定ファイルの配置先と起動時のパスを一致させる。
+
+`CannotActivateException`、`still running and does not respond` なら、画面が消えてもIDEプロセスが残っている可能性がある。[JetBrainsの復旧手順](https://youtrack.jetbrains.com/projects/WI/articles/SUPPORT-A-4102/IDE-fails-to-start-DirectoryLock-CannotActivateException-with-suppressed-BindException)に従い、次で対象を確認する。
+
+```shell
+pgrep -af '[a]ndroid-studio|[A]ndroidStudio'
+```
+
+エラーに出たPIDがAndroid Studio本体であることを確認して `kill -TERM <PID>` で終了させる。終了しない場合だけ `kill -KILL <PID>` を使う（未保存の編集は失われる）。その後 `studio .` で再起動する。
+
+全IDEプロセスの終了後もロックのエラーが続く場合だけ、エラーに表示された設定ディレクトリの `.lock` と、存在すれば `port`、`token` を削除して再起動する。動作中のIDEのロックや設定・キャッシュディレクトリ全体は削除しない。ランチャーはプロセス終了やロック削除を自動実行しない。
+
+### Android Studio が使用中に落ちる
+
+IDEログ（通常は `~/.cache/Google/AndroidStudio*/log/idea.log`）、起動ログ、カーネルログを合わせて確認する。
+
+```shell
+free -h
+journalctl -k -b --no-pager | grep -Ei 'oom|out of memory|killed process' | tail -20
+```
+
+`java.lang.OutOfMemoryError: Java heap space` はIDEのJavaヒープ不足を示す。一方、カーネルの `Killed process` はWSL全体のメモリ不足による強制終了の可能性があり、IDEのヒープだけを増やすと悪化し得る。[Android公式のメモリ設定](https://developer.android.com/studio/intro/studio-config#adjusting_heap_size)も踏まえ、WSLに割り当てたメモリとGradleなどの同時使用量を確認する。WSL全体の上限を変える場合は、Windows側の [.wslconfig](https://learn.microsoft.com/en-us/windows/wsl/wsl-config#main-wsl-settings) で管理する。
 
 ### `studio .` が `Unable to detect graphics environment` で失敗する
 

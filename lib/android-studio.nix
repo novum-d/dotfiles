@@ -23,8 +23,12 @@ let
     ) inputMethodEnvironment
   );
 
-  # Android Studioが参照するユーザー設定内のVM optionファイル。
-  vmOptionsConfigPath = "Google/AndroidStudio2026.1.1/studio64.vmoptions";
+  # WSLではバージョン更新で参照先がずれない専用ファイルを使う。
+  vmOptionsConfigPath =
+    if isWsl then
+      "dotfiles/android-studio/studio64.vmoptions"
+    else
+      "Google/AndroidStudio2026.1.1/studio64.vmoptions";
 in
 {
   # Home Manager側のsessionVariablesにも同じ入力メソッド設定を再利用させる。
@@ -36,7 +40,16 @@ in
     -Dsun.awt.enableInputMethods=true
     -Djava.awt.im.style=on-the-spot
   ''
-  + lib.optionalString (!isWsl) "-Drecreate.x11.input.method=true\n";
+  + (
+    if isWsl then
+      ''
+        -Xms512m
+        -Xmx4096m
+        -XX:+HeapDumpOnOutOfMemoryError
+      ''
+    else
+      "-Drecreate.x11.input.method=true\n"
+  );
 
   # GUIプロセスをshellから切り離し、必要なD-Busセッションとfcitx5を準備する。
   mkLauncher =
@@ -47,10 +60,40 @@ in
       ${inputMethodExports}
       export STUDIO_VM_OPTIONS="''${XDG_CONFIG_HOME:-$HOME/.config}/${vmOptionsConfigPath}"
 
+      ${lib.optionalString isWsl ''
+        set -e
+
+        # 障害時は端末上で起動エラーと終了コードを直接確認できるようにする。
+        if [ "''${1-}" = --foreground ]; then
+          shift
+          export _DOTFILES_STUDIO_DETACHED=1
+        fi
+
+        if [ ! -r "$STUDIO_VM_OPTIONS" ]; then
+          echo "studio: VM options not found: $STUDIO_VM_OPTIONS (activate the Home Manager configuration)" >&2
+          exit 1
+        fi
+      ''}
+
       # 端末を閉じてもGUIを終了させないよう、最初の起動だけ別セッションへ切り離す。
       if [ -z "''${_DOTFILES_STUDIO_DETACHED-}" ]; then
         export _DOTFILES_STUDIO_DETACHED=1
-        exec ${pkgs.util-linux}/bin/setsid --fork "$0" "$@" </dev/null >/dev/null 2>&1
+        ${
+          if isWsl then
+            ''
+              # 起動前のfcitx5/D-BusエラーやJVMの異常終了も捨てずに記録する。
+              log_dir="''${XDG_STATE_HOME:-$HOME/.local/state}/android-studio"
+              ${pkgs.coreutils}/bin/mkdir -p "$log_dir"
+              log_file="$(${pkgs.coreutils}/bin/mktemp "$log_dir/launcher.XXXXXXXX.log")"
+              ${pkgs.coreutils}/bin/ln -sfn "$log_file" "$log_dir/launcher.log"
+              echo "studio: launcher log: $log_file (diagnose with: studio --foreground .)" >&2
+              exec ${pkgs.util-linux}/bin/setsid --fork "$0" "$@" </dev/null >>"$log_file" 2>&1
+            ''
+          else
+            ''
+              exec ${pkgs.util-linux}/bin/setsid --fork "$0" "$@" </dev/null >/dev/null 2>&1
+            ''
+        }
       fi
 
       ${lib.optionalString isWsl ''
@@ -100,6 +143,21 @@ in
 
       # Android StudioはXWayland経由で起動し、Composeの日本語入力を安定させる。
       unset WAYLAND_DISPLAY
-      exec ${androidStudio}/bin/android-studio "$@"
+      ${
+        if isWsl then
+          ''
+            if ${androidStudio}/bin/android-studio "$@"; then
+              exit 0
+            else
+              status=$?
+              echo "studio: Android Studio exited with status $status" >&2
+              exit "$status"
+            fi
+          ''
+        else
+          ''
+            exec ${androidStudio}/bin/android-studio "$@"
+          ''
+      }
     '';
 }
