@@ -28,7 +28,8 @@ in
         erlang = "latest";
         elixir = "latest";
         python = "3";
-        node = "26.10.0";
+        # eMudhra中間CAのブロックを含むセキュリティリリース。
+        node = "26.12.1";
       };
 
       # PythonビルドがNix Store内のheader・library・pkg-configを見つけられるようにする。

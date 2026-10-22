@@ -5,6 +5,9 @@ let
   locale = "ja_JP.UTF-8";
 in
 {
+  # 実機とWSLのCA bundleから、漏洩したeMudhra中間CAにつながるルートを除外する。
+  security.pki.caCertificateBlacklist = import ../../lib/ca-certificate-blacklist.nix;
+
   # 開発端末として外部から接続するサービスがあるため、個別サービス側でポートを管理する。
   networking.firewall.enable = false;
 

@@ -6,6 +6,12 @@
 }:
 
 let
+  # Nix-on-Droidにはsecurity.pkiがないため、CA bundleだけを差し替える。
+  cacert = pkgs.cacert.override {
+    blacklist = import ../../lib/ca-certificate-blacklist.nix;
+  };
+  caBundle = "${cacert}/etc/ssl/certs/ca-bundle.crt";
+
   # モバイル用の2ペイン作業でも、既存セッションと判断を引き継ぐようCodexへ伝える。
   duoPromptHeader = ''
     This is a continuation of the previous Herdr/Codex mobile duo work unless the task explicitly says otherwise.
@@ -47,6 +53,20 @@ in
   # 端末復旧や基本的なCLI操作に必要な最小パッケージをシステム側へ置く。
   environment = {
     etcBackupExtension = ".bak";
+    etc =
+      lib.genAttrs
+        [
+          "ssl/certs/ca-certificates.crt"
+          "ssl/certs/ca-bundle.crt"
+          "pki/tls/certs/ca-bundle.crt"
+        ]
+        (_: {
+          source = lib.mkForce caBundle;
+        });
+    sessionVariables = {
+      NIX_SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
+      SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
+    };
     packages = with pkgs; [
       coreutils
       curl

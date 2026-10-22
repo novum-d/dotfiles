@@ -54,6 +54,7 @@ cd ~/repos/dotfiles
 
 ## 関連ドキュメント
 
+- [eMudhra中間CAの秘密鍵漏洩への対応](docs/emudhra-ca-mitigation.md)
 - [GitHub SSH設定](docs/github-ssh.md)
 - [ローカル個人情報の分離](docs/local-secrets.md)
 - [WSL上のAndroid Studioと実機接続](docs/android-studio-wsl-device.md)

@@ -40,6 +40,9 @@ in
   # Determinate Nixがdaemonを管理するため、nix-darwin側では管理しない。
   nix.enable = false;
 
+  # NixのCA bundleから、漏洩したeMudhra中間CAにつながるルートを除外する。
+  security.pki.caCertificateBlacklist = import ../../lib/ca-certificate-blacklist.nix;
+
   # Homebrew caskと同様に、非自由ライセンスのGUIアプリを許可する。
   nixpkgs.config.allowUnfree = true;
 
