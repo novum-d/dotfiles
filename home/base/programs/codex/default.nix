@@ -72,6 +72,7 @@ let
     "base"
     "droid-mcp"
     "dotfiles"
+    "nfc-batch-verify"
     "obsidian"
     "zunda-bot-rs"
   ];
